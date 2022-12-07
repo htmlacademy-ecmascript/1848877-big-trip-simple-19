@@ -15,13 +15,13 @@ module.exports = {
     }),
   ],
 
-module: {
-  rules: [
+  module: {
+    rules: [
       {
         test: /\.js$/,
         exclude: /(node_modules)/,
         use: ['babel-loader']
       }
-  ]
-}
+    ]
+  }
 };
