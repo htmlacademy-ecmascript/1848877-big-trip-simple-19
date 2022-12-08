@@ -2,6 +2,9 @@ const path = require('path');
 const CopyPlugin = require('copy-webpack-plugin');
 
 module.exports = {
+  resolve: {
+    extensions: ['.js', '.jsx', '.ts', '.tsx'],
+  },
   entry: './src/main.js',
   output: {
     filename: 'bundle.js',
