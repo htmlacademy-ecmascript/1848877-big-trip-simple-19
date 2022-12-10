@@ -16,7 +16,6 @@ export default class TripPresenter {
   init() {
     render(this.tripComponent, this.tripContainer);
     render(new SortView(), this.tripComponent.getElement());
-
     render(new PointEdit(), this.tripComponent.getElement());
     for (let i = 0; i < ROUTE_POINTS; i++) {
       render(new AddNewPoint(), this.tripComponent.getElement());
