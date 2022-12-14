@@ -1,24 +1,29 @@
 import {render} from '../render.js';
+import {getRandomArrayElement} from '../utils.js';
 import SortView from '../view/list-sort-view.js';
 import AddNewPoint from '../view/new-point-create-view.js';
 import PointEdit from '../view/point-edit-view.js';
 import TripEventListView from '../view/trip-event-list-view.js';
-
-const ROUTE_POINTS = 3;
+import TripListView from '../view/trip-list-view.js';
 
 export default class TripPresenter {
-  tripComponent = new TripEventListView();
+  tripPoints = [];
+  tripComponent = new TripListView();
 
-  constructor({tripContainer}) {
+  constructor({tripContainer, waypointModel}) {
     this.tripContainer = tripContainer;
+    this.waypointModel = waypointModel;
   }
 
   init() {
-    render(this.tripComponent, this.tripContainer);
+    this.tripPoints = [...this.waypointModel.getWaypoints()];
     render(new SortView(), this.tripComponent.getElement());
-    render(new PointEdit(), this.tripComponent.getElement());
-    for (let i = 0; i < ROUTE_POINTS; i++) {
-      render(new AddNewPoint(), this.tripComponent.getElement());
+    render(this.tripComponent, this.tripContainer);
+    const randAddNewPoint = getRandomArrayElement(this.tripPoints);
+    render(new PointEdit(getRandomArrayElement(this.tripPoints)), this.tripComponent.getElement());
+    render(new AddNewPoint(randAddNewPoint), this.tripComponent.getElement());
+    for (let i = 0; i < this.tripPoints.length; i++) {
+      render(new TripEventListView({point: this.tripPoints[i]}), this.tripComponent.getElement());
     }
   }
 }
