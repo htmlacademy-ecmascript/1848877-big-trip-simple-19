@@ -1,6 +1,6 @@
 import { createElement } from '../render.js';
 import dayjs from 'dayjs';
-import {destinations} from '../mock/waypoints.js';
+import { destinations } from '../mock/waypoints.js';
 
 function createTripEventListTemplate(tripPoint) {
   const offers = tripPoint.point.offers;
