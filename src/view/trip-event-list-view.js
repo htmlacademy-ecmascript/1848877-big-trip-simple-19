@@ -71,7 +71,7 @@ export default class TripEventListView {
     this.tripPoint = tripPoint;
   }
 
-  get template() {
+ get template() {
     return createTripEventListTemplate(this.tripPoint);
   }
 

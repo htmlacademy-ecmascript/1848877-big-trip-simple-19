@@ -7,7 +7,6 @@ import TripEventListView from '../view/trip-event-list-view.js';
 import TripListView from '../view/trip-list-view.js';
 
 export default class TripPresenter {
-
   #tripContainer = null;
   #waypointModel = null;
   #tripComponent = new TripListView();
