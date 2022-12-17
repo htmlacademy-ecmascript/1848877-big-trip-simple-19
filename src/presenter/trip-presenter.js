@@ -20,13 +20,51 @@ export default class TripPresenter {
 
   init() {
     this.#tripPoints = [...this.#waypointModel.waypoints];
-    render(new SortView(), this.#tripComponent.element);
+    render(new SortView(), this.#tripContainer);
     render(this.#tripComponent, this.#tripContainer);
     const randAddNewPoint = getRandomArrayElement(this.#tripPoints);
-    render(new PointEdit(getRandomArrayElement(this.#tripPoints)), this.#tripComponent.element);
     render(new AddNewPoint(randAddNewPoint), this.#tripComponent.element);
     for (let i = 0; i < this.#tripPoints.length; i++) {
-      render(new TripEventListView({ point: this.#tripPoints[i] }), this.#tripComponent.element);
+      this.#renderPoint(this.#tripPoints[i]);
     }
+  }
+
+  #renderPoint(point) {
+    const pointComponent = new TripEventListView({point});
+    const pointEditComponent = new PointEdit({point});
+
+    const replacePointToForm = () => {
+      this.#tripComponent.element.replaceChild(pointEditComponent.element, pointComponent.element);
+    };
+
+    const replaceFormToPoit = () => {
+      this.#tripComponent.element.replaceChild(pointComponent.element, pointEditComponent.element);
+    };
+
+    const escKeyDownHandler = (evt) => {
+      if (evt.key === 'Escape' || evt.key === 'Esc') {
+        evt.preventDefault();
+        replaceFormToPoit();
+        document.removeEventListener('keydown', escKeyDownHandler);
+      }
+    };
+
+    pointComponent.element.querySelector('.event__rollup-btn').addEventListener('click', () => {
+      replacePointToForm();
+      document.addEventListener('keydown', escKeyDownHandler);
+    });
+
+    pointEditComponent.element.querySelector('form').addEventListener('submit', (evt) => {
+      evt.preventDefault();
+      replaceFormToPoit();
+      document.removeEventListener('keydown', escKeyDownHandler);
+    });
+
+    pointEditComponent.element.querySelector('.event__rollup-btn').addEventListener('click', () => {
+      replaceFormToPoit();
+      document.removeEventListener('keydown', escKeyDownHandler);
+    });
+
+    render (pointComponent, this.#tripComponent.element);
   }
 }
