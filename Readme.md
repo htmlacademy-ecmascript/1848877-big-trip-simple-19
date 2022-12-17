@@ -1,7 +1,7 @@
 # Проект «Большое путешествие (простой)»
 
 * Студент: [Анюта Лямытских](https://up.htmlacademy.ru/ecmascript/19/user/1848877).
-* Наставник: `Неизвестно`.
+* Наставник: [Михаил Кислый] (https://htmlacademy.ru/profile/smart-grizzly).
 
 ---
 
