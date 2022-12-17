@@ -5,23 +5,23 @@ import {destinations} from '../mock/waypoints.js';
 const DATE_FORMAT = 'DD/MM/YY HH:mm';
 
 function createEventTypeItemEditTemplate(offers) {
-  const elementEditTypes = offers.map((element) => `
+  const elementEditTypes = offers.map((elem) => `
   <div class="event__type-item">
-    <input id="event-type-${element.type}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${element.type}">
-      <label class="event__type-label  event__type-label--${element.type}" for="event-type-${element.type}-1">${element.type}</label>
+    <input id="event-type-${elem.type}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${elem.type}">
+      <label class="event__type-label  event__type-label--${elem.type}" for="event-type-${elem.type}-1">${elem.type}</label>
   </div>`).join('');
 
   return elementEditTypes;
 }
 
 function createSectionOffersEditTemplate(type, offers) {
-  const elementEditOffers = offers.map((element) => `
+  const elementEditOffers = offers.map((elem) => `
   <div class="event__offer-selector">
-    <input class="event__offer-checkbox  visually-hidden" id="event-offer-${type}-1" type="checkbox" name=${element.title} ${offers.includes(element.id) ? 'checked' : ''}>
+    <input class="event__offer-checkbox  visually-hidden" id="event-offer-${type}-1" type="checkbox" name=${elem.title} ${offers.includes(elem.id) ? 'checked' : ''}>
       <label class="event__offer-label" for="event-offer-${type}-1">
-        <span class="event__offer-title">${element.title}</span>
+        <span class="event__offer-title">${elem.title}</span>
         &plus;&euro;&nbsp;
-        <span class="event__offer-price">${element.price}</span>
+        <span class="event__offer-price">${elem.price}</span>
       </label>
   </div>`).join('');
 
@@ -112,20 +112,22 @@ export default class PointEdit {
     this.tripPoint = tripPoint;
   }
 
-  getTemplate() {
+  get template() {
 
     return createPointEditTemplate(this.tripPoint);
   }
 
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
+  #element = null;
+
+  get element() {
+    if (!this.#element) {
+      this.#element = createElement(this.template);
     }
 
-    return this.element;
+    return this.#element;
   }
 
   removeElement() {
-    this.element = null;
+    this.#element = null;
   }
 }
