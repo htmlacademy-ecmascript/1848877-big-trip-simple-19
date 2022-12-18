@@ -5,6 +5,7 @@ import AddNewPoint from '../view/new-point-create-view.js';
 import PointEdit from '../view/point-edit-view.js';
 import TripEventListView from '../view/trip-event-list-view.js';
 import TripListView from '../view/trip-list-view.js';
+import NoEventsView from '../view/no-events-view.js';
 
 export default class TripPresenter {
   #tripContainer = null;
@@ -19,12 +20,16 @@ export default class TripPresenter {
 
   init() {
     this.#tripPoints = [...this.#waypointModel.waypoints];
-    render(new SortView(), this.#tripContainer);
-    render(this.#tripComponent, this.#tripContainer);
-    const randAddNewPoint = getRandomArrayElement(this.#tripPoints);
-    render(new AddNewPoint(randAddNewPoint), this.#tripComponent.element);
-    for (let i = 0; i < this.#tripPoints.length; i++) {
-      this.#renderPoint(this.#tripPoints[i]);
+    if (!this.#tripPoints.length) {
+      render(new NoEventsView(), this.#tripContainer);
+    } else {
+      render(new SortView(), this.#tripContainer);
+      render(this.#tripComponent, this.#tripContainer);
+      const randAddNewPoint = getRandomArrayElement(this.#tripPoints);
+      render(new AddNewPoint(randAddNewPoint), this.#tripComponent.element);
+      for (let i = 0; i < this.#tripPoints.length; i++) {
+        this.#renderPoint(this.#tripPoints[i]);
+      }
     }
   }
 
