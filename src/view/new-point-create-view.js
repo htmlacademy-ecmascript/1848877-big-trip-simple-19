@@ -124,6 +124,6 @@ export default class AddNewPoint extends AbstractView {
   }
 
   get template() {
-    return createAddNewPointTemplate(this.tripPoint);
+    return createAddNewPointTemplate(this.#tripPoint);
   }
 }

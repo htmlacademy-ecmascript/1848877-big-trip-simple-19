@@ -116,6 +116,6 @@ export default class PointEdit extends AbstractView {
   }
 
   get template() {
-    return createPointEditTemplate(this.tripPoint);
+    return createPointEditTemplate(this.#tripPoint);
   }
 }

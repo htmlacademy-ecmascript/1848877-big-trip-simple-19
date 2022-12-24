@@ -75,6 +75,6 @@ export default class TripEventListView extends AbstractView {
   }
 
   get template() {
-    return createTripEventListTemplate(this.tripPoint);
+    return createTripEventListTemplate(this.#tripPoint);
   }
 }
