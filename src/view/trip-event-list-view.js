@@ -3,12 +3,8 @@ import { destinations } from '../mock/waypoints.js';
 import AbstractView from '../framework/view/abstract-view.js';
 
 function createTripEventListTemplate(tripPoint) {
-  const offers = tripPoint.point.offers;
-  const type = tripPoint.point.type;
-  const dateFrom = tripPoint.point.dateFrom;
-  const dateTo = tripPoint.point.dateTo;
-  const destination = tripPoint.point.destination;
-  const basePrice = tripPoint.point.basePrice;
+  const {offers, type, dateFrom, dateTo, destination, basePrice} = tripPoint;
+
   const DATE_FORMAT_DATE = 'DD MMM';
   const DATE_FORMAT_TIME = 'HH:mm';
   const pointDestination = destinations.find((item) => destination === item.id);
@@ -68,13 +64,23 @@ function createTripEventListTemplate(tripPoint) {
 
 export default class TripEventListView extends AbstractView {
   #tripPoint = null;
+  #handleEditClick = null;
 
   constructor(tripPoint) {
+    const {point, onEditClick} = tripPoint;
     super();
-    this.#tripPoint = tripPoint;
+    this.#tripPoint = point;
+    this.#handleEditClick = onEditClick;
+    this.element.querySelector('.event__rollup-btn')
+      .addEventListener('click', this.#editClickHandler);
   }
 
   get template() {
     return createTripEventListTemplate(this.#tripPoint);
   }
+
+  #editClickHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleEditClick();
+  };
 }

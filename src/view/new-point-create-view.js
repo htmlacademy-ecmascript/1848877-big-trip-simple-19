@@ -118,6 +118,7 @@ function createAddNewPointTemplate(tripPoint) {
 export default class AddNewPoint extends AbstractView {
   #tripPoint = null;
 
+
   constructor(tripPoint) {
     super();
     this.#tripPoint = tripPoint;
@@ -126,4 +127,5 @@ export default class AddNewPoint extends AbstractView {
   get template() {
     return createAddNewPointTemplate(this.#tripPoint);
   }
+
 }
