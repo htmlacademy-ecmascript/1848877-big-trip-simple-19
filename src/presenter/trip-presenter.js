@@ -1,4 +1,4 @@
-import { render } from '../render.js';
+import {render} from '../framework/render.js';
 import { getRandomArrayElement } from '../utils.js';
 import SortView from '../view/list-sort-view.js';
 import AddNewPoint from '../view/new-point-create-view.js';
