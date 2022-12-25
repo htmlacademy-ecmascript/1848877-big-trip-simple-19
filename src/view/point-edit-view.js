@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import {destinations} from '../mock/waypoints.js';
+import { destinations } from '../mock/waypoints.js';
 import AbstractView from '../framework/view/abstract-view.js';
 
 const DATE_FORMAT = 'DD/MM/YY HH:mm';
@@ -14,16 +14,22 @@ function createEventTypeItemEditTemplate(offers) {
   return elementEditTypes;
 }
 
-function createSectionOffersEditTemplate(type, offers) {
-  const elementEditOffers = offers.map((elem) => `
-  <div class="event__offer-selector">
-    <input class="event__offer-checkbox  visually-hidden" id="event-offer-${type}-1" type="checkbox" name=${elem.title} ${offers.includes(elem.id) ? 'checked' : ''}>
-      <label class="event__offer-label" for="event-offer-${type}-1">
+function createSectionOffersEditTemplate(offers) {
+  if (offers.length === 0) {
+    return 'No available offers';
+  }
+  const elementEditOffers = offers.map((elem) => {
+    const checked = offers.includes(elem.id) ? 'checked' : '';
+    return (
+      `<div class="event__offer-selector">
+    <input class="event__offer-checkbox  visually-hidden" id="event-offer-${elem.type}-${elem.id}" type="checkbox" name=${elem.title} ${checked}>
+      <label class="event__offer-label" for="event-offer-${elem.type}-1">
         <span class="event__offer-title">${elem.title}</span>
         &plus;&euro;&nbsp;
         <span class="event__offer-price">${elem.price}</span>
       </label>
-  </div>`).join('');
+  </div>`);
+  }).join('');
 
   return elementEditOffers;
 }
@@ -31,7 +37,7 @@ function createSectionOffersEditTemplate(type, offers) {
 const chooseDestination = destinations.map((element) => `<option value="${element.name}"></option>`).join('');
 
 function createPointEditTemplate(tripPoint) {
-  const {offers, type, dateFrom, dateTo, destination, basePrice} = tripPoint;
+  const { offers, type, dateFrom, dateTo, destination, basePrice } = tripPoint;
 
   const parceDateStart = dayjs(dateFrom);
   const parceDateEnd = dayjs(dateTo);
@@ -93,7 +99,7 @@ function createPointEditTemplate(tripPoint) {
         <h3 class="event__section-title  event__section-title--offers">Offers</h3>
 
         <div class="event__available-offers">
-        ${createSectionOffersEditTemplate(type, offers)}
+        ${createSectionOffersEditTemplate(offers)}
         </div>
       </section>
 
@@ -113,7 +119,7 @@ export default class PointEdit extends AbstractView {
   handleFormClose = null;
 
   constructor(tripPoint) {
-    const {point, onFormSubmit, onFormClose} = tripPoint;
+    const { point, onFormSubmit, onFormClose } = tripPoint;
     super();
     this.#tripPoint = point;
     this.#handleFormSubmit = onFormSubmit;

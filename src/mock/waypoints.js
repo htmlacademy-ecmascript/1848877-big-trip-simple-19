@@ -1,5 +1,5 @@
 
-import { getRandomArrayElement, getRndInteger } from '../utils.js';
+import { getRandomArrayElement, getRndInteger } from '../utils/common.js';
 
 const mockDescriptions = [
   'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',

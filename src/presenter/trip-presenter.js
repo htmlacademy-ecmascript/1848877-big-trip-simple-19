@@ -1,4 +1,4 @@
-import { render } from '../framework/render.js';
+import {render, replace} from '../framework/render.js';
 import SortView from '../view/list-sort-view.js';
 import PointEdit from '../view/point-edit-view.js';
 import TripEventListView from '../view/trip-event-list-view.js';
@@ -67,11 +67,11 @@ export default class TripPresenter {
     });
 
     function replacePointToForm() {
-      this.#tripComponent.element.replaceChild(pointEditComponent.element, pointComponent.element);
+      replace(pointEditComponent, pointComponent);
     }
 
     function replaceFormToPoit() {
-      this.#tripComponent.element.replaceChild(pointComponent.element, pointEditComponent.element);
+      replace(pointComponent, pointEditComponent);
     }
 
     render(pointComponent, this.#tripComponent.element);
