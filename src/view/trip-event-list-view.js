@@ -43,7 +43,7 @@ function createTripEventListTemplate(tripPoint) {
           <p class="event__time">
             <time class="event__start-time" datetime="${dateFrom}">${parceDateStart.format(DATE_FORMAT_TIME)}</time>
             &mdash;
-            <time class="event__end-time" datetime="${dateFrom}">${parceDateEnd.format(DATE_FORMAT_TIME)}</time>
+            <time class="event__end-time" datetime="${dateTo}">${parceDateEnd.format(DATE_FORMAT_TIME)}</time>
           </p>
         </div>
         <p class="event__price">
