@@ -1,6 +1,6 @@
-import { createElement } from '../render.js';
 import dayjs from 'dayjs';
 import { destinations } from '../mock/waypoints.js';
+import AbstractView from '../framework/view/abstract-view.js';
 
 const DATE_FORMAT = 'DD/MM/YY HH:mm';
 
@@ -115,26 +115,17 @@ function createAddNewPointTemplate(tripPoint) {
   );
 }
 
-export default class AddNewPoint {
-  constructor(tripPoint) {
-    this.tripPoint = tripPoint;
-  }
+export default class AddNewPoint extends AbstractView {
+  #tripPoint = null;
 
-  #element = null;
+
+  constructor(tripPoint) {
+    super();
+    this.#tripPoint = tripPoint;
+  }
 
   get template() {
-    return createAddNewPointTemplate(this.tripPoint);
+    return createAddNewPointTemplate(this.#tripPoint);
   }
 
-  get element() {
-    if (!this.#element) {
-      this.#element = createElement(this.template);
-    }
-
-    return this.#element;
-  }
-
-  removeElement() {
-    this.#element = null;
-  }
 }

@@ -3,7 +3,7 @@ const CopyPlugin = require('copy-webpack-plugin');
 
 module.exports = {
   resolve: {
-    extensions: ['.js', '.jsx', '.ts', '.tsx'],
+    extensions: ['.js', '.jsx', '.ts', '.tsx', '.css'],
   },
   entry: './src/main.js',
   output: {
@@ -24,6 +24,10 @@ module.exports = {
         test: /\.js$/,
         exclude: /(node_modules)/,
         use: ['babel-loader']
+      },
+      {
+        test: /\.css$/i,
+        use: ['style-loader', 'css-loader']
       }
     ]
   }

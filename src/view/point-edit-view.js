@@ -1,6 +1,6 @@
-import { createElement } from '../render.js';
 import dayjs from 'dayjs';
 import {destinations} from '../mock/waypoints.js';
+import AbstractView from '../framework/view/abstract-view.js';
 
 const DATE_FORMAT = 'DD/MM/YY HH:mm';
 
@@ -107,27 +107,35 @@ function createPointEditTemplate(tripPoint) {
   );
 }
 
-export default class PointEdit {
+export default class PointEdit extends AbstractView {
+  #tripPoint = null;
+  #handleFormSubmit = null;
+  handleFormClose = null;
+
   constructor(tripPoint) {
-    this.tripPoint = tripPoint;
+    const {point, onFormSubmit, onFormClose} = tripPoint;
+    super();
+    this.#tripPoint = point;
+    this.#handleFormSubmit = onFormSubmit;
+    this.handleFormClose = onFormClose;
+
+    this.element.querySelector('form')
+      .addEventListener('submit', this.#formSubmitHandler);
+
+    this.element.querySelector('.event__rollup-btn')
+      .addEventListener('click', this.#handleFormClose);
   }
 
   get template() {
-
-    return createPointEditTemplate(this.tripPoint);
+    return createPointEditTemplate(this.#tripPoint);
   }
 
-  #element = null;
+  #formSubmitHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleFormSubmit();
+  };
 
-  get element() {
-    if (!this.#element) {
-      this.#element = createElement(this.template);
-    }
-
-    return this.#element;
-  }
-
-  removeElement() {
-    this.#element = null;
-  }
+  #handleFormClose = () => {
+    this.handleFormClose();
+  };
 }
