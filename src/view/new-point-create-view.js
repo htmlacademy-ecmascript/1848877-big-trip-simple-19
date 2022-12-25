@@ -14,17 +14,23 @@ function createEventTypeItemTemplate(offers) {
   return elementTypes;
 }
 
-function createSectionOffersTemplate(type, offers) {
+function getPicturesListTemplate(pictures) {
+  return pictures.map((picture) => `<img class="event__photo" src=${picture.src} alt="${picture.description}">`).join('');
+}
 
-  const elementOffers = offers.map((element) => `
+function createSectionOffersTemplate(offers) {
+  const elementOffers = offers.map((element) => {
+    const checked = offers.includes(element.id) ? 'checked' : '';
+    return (`
   <div class="event__offer-selector">
-  <input class="event__offer-checkbox  visually-hidden" id="event-offer-${type}-1" type="checkbox" name=${element.title} ${offers.includes(element.id) ? 'checked' : ''}>
-  <label class="event__offer-label" for="event-offer-$${type}-1">
+  <input class="event__offer-checkbox  visually-hidden" id="event-offer-${element.type}-${element.id}" type="checkbox" name=${element.title} ${checked}>
+  <label class="event__offer-label" for="event-offer-$${element.type}-1">
     <span class="event__offer-title">${element.title}</span>
     &plus;&euro;&nbsp;
     <span class="event__offer-price">${element.price}</span>
   </label>
-</div>`).join('');
+</div>`);
+  }).join('');
 
   return elementOffers;
 }
@@ -101,11 +107,7 @@ function createAddNewPointTemplate(tripPoint) {
 
        <div class="event__photos-container">
           <div class="event__photos-tape">
-            <img class="event__photo" src="img/photos/1.jpg" alt="Event photo">
-            <img class="event__photo" src="img/photos/2.jpg" alt="Event photo">
-            <img class="event__photo" src="img/photos/3.jpg" alt="Event photo">
-            <img class="event__photo" src="img/photos/4.jpg" alt="Event photo">
-            <img class="event__photo" src="img/photos/5.jpg" alt="Event photo">
+          ${getPicturesListTemplate(destination.pictures)}
           </div>
         </div>
       </section>
