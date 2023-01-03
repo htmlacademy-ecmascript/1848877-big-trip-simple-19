@@ -1,5 +1,5 @@
 import { render, replace } from '../framework/render.js';
-import PointEdit from '../view/point-edit-view.js';
+import PointEditView from '../view/point-edit-view.js';
 import TripEventListView from '../view/trip-event-list-view.js';
 
 export default class PointPresenter {
@@ -22,7 +22,7 @@ export default class PointPresenter {
       onEditClick: this.#handleEditClick
     });
 
-    this.#pointEditComponent = new PointEdit({
+    this.#pointEditComponent = new PointEditView({
       point: this.#point,
       onFormSubmit: this.#handleFormSubmit,
       onFormClose: this.#handleFormSubmit

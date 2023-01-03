@@ -117,7 +117,7 @@ function createAddNewPointTemplate(tripPoint) {
   );
 }
 
-export default class AddNewPoint extends AbstractView {
+export default class NewPointCreateView extends AbstractView {
   #tripPoint = null;
 
 

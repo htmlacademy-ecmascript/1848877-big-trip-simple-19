@@ -113,7 +113,7 @@ function createPointEditTemplate(tripPoint) {
   );
 }
 
-export default class PointEdit extends AbstractView {
+export default class PointEditView extends AbstractView {
   #tripPoint = null;
   #handleFormSubmit = null;
   handleFormClose = null;
