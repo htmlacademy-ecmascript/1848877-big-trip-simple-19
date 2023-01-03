@@ -1,8 +1,6 @@
-function getRandomArrayElement(arr) {
-  return arr[Math.floor(Math.random() * arr.length)];
-}
+export const getRandomArrayElement = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
-function getRandomElementOfArray(arr) {
+export const getRandomElementOfArray = (arr) => {
   const result = [];
   for (let i; i < arr.length; i++) {
     const item = getRandomArrayElement(arr);
@@ -12,8 +10,10 @@ function getRandomElementOfArray(arr) {
     }
   }
   return result;
-}
+};
 
-const getRndInteger = (min, max) => Math.floor(Math.random() * (max - min) ) + min;
+export const getRndInteger = (min, max) => Math.floor(Math.random() * (max - min) ) + min;
 
-export {getRandomArrayElement, getRandomElementOfArray, getRndInteger};
+export const updateItem = (items, update) => items.map((item) => item.uniqueId === update.uniqueId ? update : item);
+
+export const getRandomNumber = (min, max) => Math.floor(Math.random() * (max - min + 1) + min);
