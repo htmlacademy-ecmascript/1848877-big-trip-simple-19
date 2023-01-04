@@ -1,12 +1,10 @@
-import dayjs from 'dayjs';
 import { destinations } from '../mock/waypoints.js';
 import AbstractView from '../framework/view/abstract-view.js';
+import { humanizeEventDate, humanizeEventTime } from '../utils/task.js';
 
 function createTripEventListTemplate(tripPoint) {
   const {offers, type, dateFrom, dateTo, destination, basePrice} = tripPoint;
 
-  const DATE_FORMAT_DATE = 'DD MMM';
-  const DATE_FORMAT_TIME = 'HH:mm';
   const pointDestination = destinations.find((item) => destination === item.id);
   const checkedOffers = offers.map((element) => element.id);
 
@@ -27,23 +25,20 @@ function createTripEventListTemplate(tripPoint) {
     }
   };
 
-  const parceDateStart = dayjs(dateFrom);
-  const parceDateEnd = dayjs(dateTo);
-
   return (`
   <ul class="trip-events__list">
     <li class="trip-events__item">
       <div class="event">
-        <time class="event__date" datetime="${dateFrom}">${parceDateStart.format(DATE_FORMAT_DATE)}</time>
+        <time class="event__date" datetime="${dateFrom}">${humanizeEventDate(dateFrom)}</time>
         <div class="event__type">
           <img class="event__type-icon" width="42" height="42" src="img/icons/${type}.png" alt="Event type icon">
         </div>
         <h3 class="event__title">${type} ${pointDestination.name}</h3>
         <div class="event__schedule">
           <p class="event__time">
-            <time class="event__start-time" datetime="${dateFrom}">${parceDateStart.format(DATE_FORMAT_TIME)}</time>
+            <time class="event__start-time" datetime="${dateFrom}">${humanizeEventTime(dateFrom)}</time>
             &mdash;
-            <time class="event__end-time" datetime="${dateTo}">${parceDateEnd.format(DATE_FORMAT_TIME)}</time>
+            <time class="event__end-time" datetime="${dateTo}">${humanizeEventTime(dateTo)}</time>
           </p>
         </div>
         <p class="event__price">
@@ -65,12 +60,17 @@ function createTripEventListTemplate(tripPoint) {
 export default class TripEventListView extends AbstractView {
   #tripPoint = null;
   #handleEditClick = null;
+  #offers = null;
+  #destination = null;
 
   constructor(tripPoint) {
-    const {point, onEditClick} = tripPoint;
+    const {point, onEditClick, offers, destination} = tripPoint;
     super();
     this.#tripPoint = point;
+    this.#offers = offers;
+    this.#destination = destinations.find((item) => destination === item.id);
     this.#handleEditClick = onEditClick;
+
     this.element.querySelector('.event__rollup-btn')
       .addEventListener('click', this.#editClickHandler);
   }
@@ -81,6 +81,6 @@ export default class TripEventListView extends AbstractView {
 
   #editClickHandler = (evt) => {
     evt.preventDefault();
-    this.#handleEditClick();
+    this.#handleEditClick(this.#tripPoint, this.#offers, this.#destination);
   };
 }

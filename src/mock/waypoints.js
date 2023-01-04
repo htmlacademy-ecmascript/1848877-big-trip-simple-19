@@ -1,5 +1,6 @@
 
-import { getRandomArrayElement, getRndInteger } from '../utils/common.js';
+import { getRandomArrayElement, getRndInteger, getRandomNumber } from '../utils/common.js';
+import {nanoid} from 'nanoid';
 
 const mockDescriptions = [
   'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
@@ -223,10 +224,11 @@ const generateWaypoits = (count) => {
     const randType = getRandomArrayElement(types);
     array.push({
       basePrice: getRndInteger(1000, 10000),
-      dateFrom: '2019-05-10T22:55:56.845Z',
-      dateTo: '2019-05-11T11:22:13.375Z',
+      dateFrom: new Date(2021, getRandomNumber(1, 12), getRandomNumber(1, 30), getRandomNumber(0, 24), 24, 0),
+      dateTo: new Date(getRandomNumber(2022, 2023), getRandomNumber(1, 12), getRandomNumber(1, 30), getRandomNumber(0, 24), 24, 0),
       destination: getRndInteger(1, 11),
       id: getRndInteger(0, 11),
+      uniqueId: nanoid(),
       offers: offersType.find((elem) => elem.type === randType).offers,
       type: randType
     });

@@ -113,22 +113,27 @@ function createPointEditTemplate(tripPoint) {
   );
 }
 
-export default class PointEdit extends AbstractView {
+export default class PointEditView extends AbstractView {
   #tripPoint = null;
   #handleFormSubmit = null;
   handleFormClose = null;
+  #offers = null;
+  #destination = null;
 
   constructor(tripPoint) {
-    const { point, onFormSubmit, onFormClose } = tripPoint;
+    const { point, onFormSubmit, onFormClose, offers, destination } = tripPoint;
     super();
     this.#tripPoint = point;
     this.#handleFormSubmit = onFormSubmit;
     this.handleFormClose = onFormClose;
+    this.#offers = offers;
+    this.#destination = destinations.find((item) => destination === item.id);
 
     this.element.querySelector('form')
       .addEventListener('submit', this.#formSubmitHandler);
-
     this.element.querySelector('.event__rollup-btn')
+      .addEventListener('click', this.#handleFormClose);
+    this.element.querySelector('.event__reset-btn')
       .addEventListener('click', this.#handleFormClose);
   }
 
@@ -138,10 +143,10 @@ export default class PointEdit extends AbstractView {
 
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
-    this.#handleFormSubmit();
+    this.#handleFormSubmit(this.#tripPoint, this.#offers, this.#destination);
   };
 
   #handleFormClose = () => {
-    this.handleFormClose();
+    this.handleFormClose(this.#tripPoint, this.#offers, this.#destination);
   };
 }
