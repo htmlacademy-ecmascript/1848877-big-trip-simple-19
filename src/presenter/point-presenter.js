@@ -9,13 +9,17 @@ const Mode = {
 
 export default class PointPresenter {
   #tripPointContainer = null;
+
   #pointComponent = null;
   #pointEditComponent = null;
-  #handleModeChange = null;
+
   #point = null;
-  #mode = Mode.DEFAULT;
   #offers = null;
   #destination = null;
+
+  #handleModeChange = null;
+  #mode = Mode.DEFAULT;
+
   #handleDataChange = null;
 
   constructor({tripPointContainer, onModeChange, onDataChange}) {
@@ -44,7 +48,7 @@ export default class PointPresenter {
       offers: this.#offers,
       destination: this.#destination,
       onFormSubmit: this.#handleFormSubmit,
-      onFormClose: this.#handleFormSubmit,
+      onFormClose: this.#closeEventEditForm,
     });
 
 
@@ -103,6 +107,11 @@ export default class PointPresenter {
   #handleFormSubmit = (point, offers, destination) => {
     this.#handleDataChange(point, offers, destination);
     this.#replaceFormToPoit();
+  };
+
+  #closeEventEditForm = () => {
+    this.#replaceFormToPoit();
+    document.removeEventListener('keydown', this.#escKeyDownHandler);
   };
 
 }
