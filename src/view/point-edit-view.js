@@ -147,6 +147,6 @@ export default class PointEditView extends AbstractView {
   };
 
   #handleFormClose = () => {
-    this.handleFormClose(this.#tripPoint, this.#offers, this.#destination);
+    this.handleFormClose();
   };
 }
