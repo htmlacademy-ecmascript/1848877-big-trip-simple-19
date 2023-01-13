@@ -20,7 +20,22 @@ const mockCities = [
   'Amsterdam',
   'Algiers',
   'Belgrade',
-  'Birmingham'
+  'Birmingham',
+  'Yerevan',
+  'Duesseldorf',
+  'Geneva'
+];
+
+const pictures = [
+  'https://loremflickr.com/248/152?random=1',
+  'https://loremflickr.com/248/152?random=2',
+  'https://loremflickr.com/248/152?random=3',
+  'https://loremflickr.com/248/152?random=4',
+  'https://loremflickr.com/248/152?random=5',
+  'https://loremflickr.com/248/152?random=6',
+  'https://loremflickr.com/248/152?random=7',
+  'https://loremflickr.com/248/152?random=8',
+  'https://loremflickr.com/248/152?random=9'
 ];
 
 const createDestinations = (count) => {
@@ -32,7 +47,7 @@ const createDestinations = (count) => {
       name: getRandomArrayElement(mockCities),
       pictures: [
         {
-          src: `https://loremflickr.com/248/152?random=${getRndInteger(1, 10)}`,
+          src: getRandomArrayElement(pictures),
           description: getRandomArrayElement(mockDescriptions),
         }
       ]
@@ -206,7 +221,7 @@ export const offersType = [
   },
 ];
 
-const types = [
+export const types = [
   'taxi',
   'bus',
   'train',
