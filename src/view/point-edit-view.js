@@ -1,6 +1,8 @@
 import dayjs from 'dayjs';
 import { destinations, offersType } from '../mock/waypoints.js';
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
+import flatpickr from 'flatpickr';
+import 'flatpickr/dist/flatpickr.min.css';
 //import { TYPES } from '../const.js';
 
 const DATE_FORMAT = 'DD/MM/YY HH:mm';
@@ -35,7 +37,7 @@ function createEventTypeItemEditTemplate(offers) {
 
 function createSectionOffersEditTemplate(offers, offer) {
   let template = '';
-  if(offers){
+  if (offers) {
     template = offers.offers.map((elem) => (
       `<div class="event__offer-selector">
     <input class="event__offer-checkbox  visually-hidden" id="event-offer-${elem.type}-${elem.id}" type="checkbox" name=${elem.title} data-offer-id="${elem.id}" ${offer.includes(elem.id) ? 'checked' : ''}>
@@ -82,7 +84,7 @@ function createPointEditTemplate(tripPoint) {
         <label class="event__label  event__type-output" for="event-destination-${id}">
         ${type}
         </label>
-        <input class="event__input  event__input--destination" id="event-destination-${id}" type="text" name="event-destination" value='${pointDestination ? pointDestination.description : ''}' list="destination-list-${id}">
+        <input class="event__input  event__input--destination" id="event-destination-${id}" type="text" name="event-destination" value='${pointDestination ? pointDestination.name : ''}' list="destination-list-${id}">
         <datalist id="destination-list-${id}">
           ${chooseDestination}
         </datalist>
@@ -90,10 +92,10 @@ function createPointEditTemplate(tripPoint) {
 
       <div class="event__field-group  event__field-group--time">
         <label class="visually-hidden" for="event-start-time-${id}">From</label>
-        <input class="event__input  event__input--time" id="event-start-time-${id}" type="text" name="event-start-time" value='${parceDateStart.format(DATE_FORMAT)}'>
+        <input class="event__input  event__input--time event-start-time" data-start-time id="event-start-time-${id}" type="text" name="event-start-time" value='${parceDateStart.format(DATE_FORMAT)}'>
         &mdash;
         <label class="visually-hidden" for="event-end-time-${id}">To</label>
-        <input class="event__input  event__input--time" id="event-end-time-${id}" type="text" name="event-end-time" value='${parceDateEnd.format(DATE_FORMAT)}'>
+        <input class="event__input  event__input--time event-end-time" data-end-time id="event-end-time-${id}" type="text" name="event-end-time" value='${parceDateEnd.format(DATE_FORMAT)}'>
       </div>
 
       <div class="event__field-group  event__field-group--price">
@@ -101,7 +103,7 @@ function createPointEditTemplate(tripPoint) {
           <span class="visually-hidden">Price</span>
           &euro;
         </label>
-        <input class="event__input  event__input--price" id="event-price-${id}" type="text" name="event-price" value="${basePrice}">
+        <input class="event__input  event__input--price" id="event-price-${id}" type="text" name="event-price" value="${basePrice !== null ? basePrice : ''}">
       </div>
 
       <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
@@ -135,11 +137,13 @@ function createPointEditTemplate(tripPoint) {
 }
 
 export default class PointEditView extends AbstractStatefulView {
-  #tripPoint = null;
+  //#tripPoint = null;
   #handleFormSubmit = null;
   handleFormClose = null;
   #offers = null;
   #destination = null;
+  #datepickerFrom = null;
+  #datepickerTo = null;
 
   constructor(tripPoint) {
     const { point, onFormSubmit, onFormClose, offers, destination } = tripPoint;
@@ -172,6 +176,8 @@ export default class PointEditView extends AbstractStatefulView {
       .addEventListener('change', this.#pointTypeChangeHandler);
     this.element.querySelector('.event__input--destination')
       .addEventListener('change', this.#destinationChangeHandler);
+
+    this.#setDatepicker();
   }
 
   #offerChangeHandler = (evt) => {
@@ -193,7 +199,7 @@ export default class PointEditView extends AbstractStatefulView {
     evt.preventDefault();
     const regex = /[0-9]/;
     let inputPrice;
-    if (regex.test(evt.target.value)){
+    if (regex.test(evt.target.value)) {
       inputPrice = evt.target.value;
     }
     if (evt.target.value === '') { evt.target.value = '0'; }
@@ -214,7 +220,9 @@ export default class PointEditView extends AbstractStatefulView {
     evt.preventDefault();
     const pointDestination = this._state.destination.find((dest) => dest.name === evt.target.value);
     const destId = pointDestination === undefined ? 1 : pointDestination.id;
-    this.updateElement({ destId });
+    this.updateElement({
+      destId
+    });
 
   };
 
@@ -228,6 +236,54 @@ export default class PointEditView extends AbstractStatefulView {
     this.handleFormClose();
   };
 
+  #dateFromChangeHandler = ([userDate]) => {
+    this.updateElement({
+      dateFrom: userDate,
+    });
+  };
+
+  #dateToChangeHandler = ([userDate]) => {
+    this.updateElement({
+      dateTo: userDate,
+    });
+  };
+
+  #setDatepicker() {
+    this.#datepickerFrom = flatpickr(
+      this.element.querySelector('.event-start-time'),
+      {
+        dateFormat: 'd/m/y H:i',
+        enableTime: true,
+        defaultDate: this._state.dateFrom,
+        onChange: this.#dateFromChangeHandler,
+      },
+    );
+    this.#datepickerTo = flatpickr(
+      this.element.querySelector('.event-end-time'),
+      {
+        dateFormat: 'd/m/y H:i',
+        enableTime: true,
+        defaultDate: this._state.dateTo,
+        minDate: this._state.dateFrom,
+        onChange: this.#dateToChangeHandler,
+      },
+    );
+  }
+
+
+  removeElement() {
+    super.removeElement();
+
+    if (this.#datepickerFrom) {
+      this.#datepickerFrom.destroy();
+      this.#datepickerFrom = null;
+    }
+    if (this.#datepickerTo) {
+      this.#datepickerTo.destroy();
+      this.#datepickerTo = null;
+    }
+  }
+
   reset(point) {
     this.updateElement(
       PointEditView.parsePointToState(point),
@@ -235,13 +291,14 @@ export default class PointEditView extends AbstractStatefulView {
   }
 
   static parsePointToState(point) {
-    return {...point
+    return {
+      ...point
     };
   }
 
   static parseStateToPoint(state) {
-    return {...state
+    return {
+      ...state
     };
   }
 }
-
