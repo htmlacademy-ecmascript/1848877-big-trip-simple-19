@@ -66,7 +66,7 @@ export default class TripPresenter {
 
 
   #renderNoPoint() {
-    this.#noPointComponent = new new NoEventsView()({
+    this.#noPointComponent = new NoEventsView({
       filterType: this.#filterType
     });
 
