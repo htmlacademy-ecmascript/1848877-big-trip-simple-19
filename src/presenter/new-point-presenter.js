@@ -1,8 +1,18 @@
 import { remove, render, RenderPosition } from '../framework/render.js';
 import PointEditView from '../view/point-edit-view.js';
-import { UserAction, UpdateType } from '../const.js';
+import { UserAction, UpdateType, TYPES } from '../const.js';
 
-export default class NewTaskPresenter {
+const BLANK_POINT = {
+  basePrice: 0,
+  dateFrom: new Date(),
+  dateTo: new Date(),
+  destination: -1,
+  id:0,
+  offers: [],
+  type: TYPES[0]
+};
+
+export default class NewPointPresenter {
   #pointListContainer = null;
   #handleDataChange = null;
   #handleDestroy = null;
@@ -22,7 +32,8 @@ export default class NewTaskPresenter {
 
     this.#pointEditComponent = new PointEditView({
       onFormSubmit: this.#handleFormSubmit,
-      onDeleteClick: this.#handleDeleteClick
+      onDeleteClick: this.#handleDeleteClick,
+      point: BLANK_POINT,
     });
 
     render(this.#pointEditComponent, this.#pointListContainer, RenderPosition.AFTERBEGIN);

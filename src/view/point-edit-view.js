@@ -4,18 +4,7 @@ import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 
-//import { TYPES } from '../const.js';
-
 const DATE_FORMAT = 'DD/MM/YY HH:mm';
-/*const BLANK_POINT = {
-  basePrice: 0,
-  dateFrom: '',
-  dateTo: '',
-  destination: 1,
-  id:0,
-  offers: [],
-  type: TYPES[0]
-};*/
 
 function getPicturesListTemplate(pointDestination) {
   let template = '';
@@ -61,7 +50,7 @@ function createSectionOffersEditTemplate(offerTypes, offer) {
           id="event-offer-${elem.type}-${elem.id}"
           type="checkbox"
           name=${elem.title}
-          data-offer-id="${elem.id}" ${offer.includes(elem.id) ? 'checked' : ''}
+          data-offer-id="${elem.id}" ${offer && offer.includes(elem.id) ? 'checked' : ''}
         >
           <label class="event__offer-label" for="event-offer-${elem.type}-${elem.id}">
             <span class="event__offer-title">${elem.title}</span>
@@ -166,7 +155,6 @@ function createPointEditTemplate(tripPoint) {
 }
 
 export default class PointEditView extends AbstractStatefulView {
-  //#tripPoint = null;
   #handleFormSubmit = null;
   #handleFormClose = null;
   #offers = null;
@@ -254,9 +242,7 @@ export default class PointEditView extends AbstractStatefulView {
     this.updateElement({
       destination: destId,
     });
-
   };
-
 
   #formSubmitHandler = (evt) => {
     evt.preventDefault();

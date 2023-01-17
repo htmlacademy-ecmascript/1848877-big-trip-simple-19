@@ -6,7 +6,7 @@ import PointPresenter from './point-presenter.js';
 import { SortType, UpdateType, UserAction, FilterType } from '../const.js';
 import { sortPointDate, sortPointPrice } from '../utils/task.js';
 import { filter } from '../utils/filters.js';
-import NewPointPresenter from './new-poin-presenter.js';
+import NewPointPresenter from './new-point-presenter.js';
 
 export default class TripPresenter {
   #tripContainer = null;
@@ -60,7 +60,7 @@ export default class TripPresenter {
 
   createPoint() {
     this.#currentSortType = SortType.DATE;
-    this.#filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
+    this.#filterModel.setFilter(UpdateType.MAJOR, FilterType.ALL);
     this.#newPointPresenter.init();
   }
 
