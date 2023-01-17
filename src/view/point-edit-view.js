@@ -3,6 +3,7 @@ import { destinations, offersType } from '../mock/waypoints.js';
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
+
 //import { TYPES } from '../const.js';
 
 const DATE_FORMAT = 'DD/MM/YY HH:mm';
@@ -139,20 +140,22 @@ function createPointEditTemplate(tripPoint) {
 export default class PointEditView extends AbstractStatefulView {
   //#tripPoint = null;
   #handleFormSubmit = null;
-  handleFormClose = null;
+  #handleFormClose = null;
   #offers = null;
   #destination = null;
   #datepickerFrom = null;
   #datepickerTo = null;
+  #handleDeleteClick = null;
 
   constructor(tripPoint) {
-    const { point, onFormSubmit, onFormClose, offers, destination } = tripPoint;
+    const { point, onFormSubmit, onFormClose, offers, destination, onDeleteClick } = tripPoint;
     super();
     this._setState(PointEditView.parsePointToState(point));
     this.#handleFormSubmit = onFormSubmit;
-    this.handleFormClose = onFormClose;
+    this.#handleFormClose = onFormClose;
     this.#offers = offers;
     this.#destination = destinations.find((item) => destination === item.id);
+    this.#handleDeleteClick = onDeleteClick;
 
     this._restoreHandlers();
   }
@@ -167,7 +170,7 @@ export default class PointEditView extends AbstractStatefulView {
     this.element.querySelector('.event__rollup-btn')
       .addEventListener('click', this.#formCloseHandler);
     this.element.querySelector('.event__reset-btn')
-      .addEventListener('click', this.#formCloseHandler);
+      .addEventListener('click', this.#deleteClickHandler);
     this.element.querySelector('.event__available-offers')
       .addEventListener('change', this.#offerChangeHandler);
     this.element.querySelector('.event__input--price')
@@ -233,7 +236,7 @@ export default class PointEditView extends AbstractStatefulView {
   };
 
   #formCloseHandler = () => {
-    this.handleFormClose();
+    this.#handleFormClose();
   };
 
   #dateFromChangeHandler = ([userDate]) => {
@@ -269,6 +272,11 @@ export default class PointEditView extends AbstractStatefulView {
       },
     );
   }
+
+  #deleteClickHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleDeleteClick(PointEditView.parseStateToPoint(this._state));
+  };
 
 
   removeElement() {

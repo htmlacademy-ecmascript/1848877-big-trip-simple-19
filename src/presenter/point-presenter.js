@@ -1,6 +1,7 @@
 import { render, replace, remove } from '../framework/render.js';
 import PointEditView from '../view/point-edit-view.js';
 import TripEventListView from '../view/trip-event-list-view.js';
+import {UserAction, UpdateType} from '../const.js';
 
 const Mode = {
   DEFAULT: 'DEFAULT',
@@ -28,11 +29,11 @@ export default class PointPresenter {
     this.#handleDataChange = onDataChange;
   }
 
-  init(point, offers, destination) {
+  init(point) {
+    const {offers, destination} = point;
     this.#point = point;
     this.#offers = offers;
     this.#destination = destination;
-
     const prevPointComponent = this.#pointComponent;
     const prevPointEditComponent = this.#pointEditComponent;
 
@@ -47,8 +48,9 @@ export default class PointPresenter {
       point: this.#point,
       offers: this.#offers,
       destination: this.#destination,
-      onFormSubmit: this.#handleFormSubmit,
-      onFormClose: this.#closeEventEditForm,
+      onFormSubmit: this.#formSubmitHandler,
+      onFormClose: this.#closeEventEditFormHandler,
+      onDeleteClick: this.#deleteClickHandler,
     });
 
 
@@ -106,14 +108,26 @@ export default class PointPresenter {
     this.#replacePointToForm();
   };
 
-  #handleFormSubmit = (point, offers, destination) => {
-    this.#handleDataChange(point, offers, destination);
+  #formSubmitHandler = (point, offers, destination) => {
+    this.#handleDataChange(
+      UserAction.UPDATE_POINT,
+      UpdateType.MINOR,
+      point,
+      offers,
+      destination);
     this.#replaceFormToPoit();
   };
 
-  #closeEventEditForm = () => {
+  #closeEventEditFormHandler = () => {
     this.#replaceFormToPoit();
     document.removeEventListener('keydown', this.#escKeyDownHandler);
   };
 
+  #deleteClickHandler = (point) => {
+    this.#handleDataChange(
+      UserAction.DELETE_POINT,
+      UpdateType.MINOR,
+      point,
+    );
+  };
 }
