@@ -39,7 +39,7 @@ function createEventTypeItemEditTemplate(offers) {
   return elementEditTypes;
 }
 
-function createSectionOffersEditTemplate(offerTypes, offer) {
+function createSectionOffersEditTemplate(offerTypes, offer, type) {
   let template = '';
   if (offerTypes) {
     template = offerTypes.offers.map((elem) => (
@@ -47,12 +47,12 @@ function createSectionOffersEditTemplate(offerTypes, offer) {
         <input
           class="event__offer-checkbox
           visually-hidden"
-          id="event-offer-${elem.type}-${elem.id}"
+          id="event-offer-${type}-${elem.id}"
           type="checkbox"
           name=${elem.title}
           data-offer-id="${elem.id}" ${offer && offer.includes(elem.id) ? 'checked' : ''}
         >
-          <label class="event__offer-label" for="event-offer-${elem.type}-${elem.id}">
+          <label class="event__offer-label" for="event-offer-${type}-${elem.id}">
             <span class="event__offer-title">${elem.title}</span>
             &plus;&euro;&nbsp;
             <span class="event__offer-price">${elem.price}</span>
@@ -135,7 +135,7 @@ function createPointEditTemplate(tripPoint) {
         <h3 class="event__section-title  event__section-title--offers">Offers</h3>
 
         <div class="event__available-offers">
-        ${createSectionOffersEditTemplate(pointTypeOffer, offers)}
+        ${createSectionOffersEditTemplate(pointTypeOffer, offers, type)}
         </div>
       </section>
 
