@@ -1,13 +1,12 @@
 import { destinations } from '../mock/waypoints.js';
 import AbstractView from '../framework/view/abstract-view.js';
-import { humanizeEventDate, humanizeEventTime, calculatePrice } from '../utils/task.js';
+import { humanizeEventDate, humanizeEventTime} from '../utils/task.js';
 
 function createTripEventListTemplate(tripPoint) {
   const {offers, type, dateFrom, dateTo, destination, basePrice} = tripPoint;
 
   const pointDestination = destinations.find((item) => destination === item.id);
   const checkedOffers = offers.map((element) => element.id);
-  const calculatePrices = calculatePrice(tripPoint);
 
   const offersTemplate = () => {
     if (!checkedOffers.length) {
@@ -43,7 +42,7 @@ function createTripEventListTemplate(tripPoint) {
           </p>
         </div>
         <p class="event__price">
-          &euro;&nbsp;<span class="event__price-value">${calculatePrices}</span>
+          &euro;&nbsp;<span class="event__price-value">${basePrice}</span>
         </p>
         <h4 class="visually-hidden">Offers:</h4>
         <ul class="event__selected-offers">

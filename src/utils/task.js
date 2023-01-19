@@ -37,7 +37,7 @@ export const sortPointPrice = (pointA, pointB) => {
 
 export const isDatesEqual = (dateA, dateB) => (dateA === null && dateB === null) || dayjs(dateA).isSame(dateB, 'D');
 
-export const calculatePrice = (point) => {
+/*export const calculatePrice = (point) => {
   let price = point.basePrice;
   //находим нужный список offers, соответствуйщий типу
   const pointTypeOffer = offersType.find((offer) => offer.type === point.type).offers;
@@ -47,4 +47,4 @@ export const calculatePrice = (point) => {
     price += offerPrice;
   });
   return price;
-};
+};*/
