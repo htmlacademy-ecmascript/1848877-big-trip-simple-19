@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import {offersType} from '../mock/waypoints.js';
+//import {offersType} from '../mock/waypoints.js';
 
 export const humanizeEventDate = (date) => dayjs(date).format('MMM DD');
 
