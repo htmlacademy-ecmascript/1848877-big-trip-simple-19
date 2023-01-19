@@ -50,7 +50,7 @@ function createSectionOffersEditTemplate(offerTypes, offer, type) {
           id="event-offer-${type}-${elem.id}"
           type="checkbox"
           name=${elem.title}
-          data-offer-id="${elem.id}" ${offer && offer.includes(elem.id) ? 'checked' : ''}
+          data-offer-id="${elem.id}" ${offer.includes(elem.id) ? 'checked' : ''}
         >
           <label class="event__offer-label" for="event-offer-${type}-${elem.id}">
             <span class="event__offer-title">${elem.title}</span>
