@@ -4,28 +4,41 @@ import TripListView from '../view/trip-list-view.js';
 import NoEventsView from '../view/no-events-view.js';
 import PointPresenter from './point-presenter.js';
 import { SortType, UpdateType, UserAction, FilterType } from '../const.js';
-import { sortPointDate, sortPointPrice } from '../utils/task.js';
+import { sortPointDate, sortPointPrice, calculatePrice } from '../utils/task.js';
 import { filter } from '../utils/filters.js';
 import NewPointPresenter from './new-point-presenter.js';
+import LoadingView from '../view/loading-view.js';
+import UiBlocker from '../framework/ui-blocker/ui-blocker.js';
+
+const TimeLimit = {
+  LOWER_LIMIT: 350,
+  UPPER_LIMIT: 1000,
+};
 
 export default class TripPresenter {
   #tripContainer = null;
-  #waypointModel = null;
+  #sortContainer = null;
+  #apiModel = null;
   #filterModel = null;
-
+  #loadingComponent = new LoadingView();
   #tripComponent = new TripListView();
   #noPointComponent = null;
   #newPointPresenter = null;
   #sortComponent = null;
   #currentSortType = SortType.DATE;
   #filterType = FilterType.ALL;
+  #isLoading = true;
   #onNewPointDestroy = null;
-
   #pointPresenter = new Map();
+  #uiBlocker = new UiBlocker({
+    lowerLimit: TimeLimit.LOWER_LIMIT,
+    upperLimit: TimeLimit.UPPER_LIMIT
+  });
 
-  constructor({ tripContainer, waypointModel, filterModel, onNewPointDestroy }) {
+  constructor({ tripContainer, sortContainer, apiModel, filterModel, onNewPointDestroy }) {
+    this.#apiModel = apiModel;
     this.#tripContainer = tripContainer;
-    this.#waypointModel = waypointModel;
+    this.#sortContainer = sortContainer;
     this.#filterModel = filterModel;
     this.#onNewPointDestroy = onNewPointDestroy;
 
@@ -35,20 +48,26 @@ export default class TripPresenter {
       onDestroy: this.#onNewPointDestroy,
     });
 
-    this.#waypointModel.addObserver(this.#handleModelEvent);
+    this.#apiModel.addObserver(this.#handleModelEvent);
     this.#filterModel.addObserver(this.#handleModelEvent);
   }
 
   get points() {
     this.#filterType = this.#filterModel.filter;
-    const points = this.#waypointModel.waypoints;
+    const points = this.#apiModel.points;
     const filteredTasks = filter[this.#filterType](points);
 
     switch (this.#currentSortType) {
       case SortType.DATE:
-        return filteredTasks.sort(sortPointDate);
+        filteredTasks.sort(sortPointDate);
+        break;
       case SortType.PRICE:
-        return filteredTasks.sort(sortPointPrice);
+        filteredTasks.forEach((point) => {
+          point.totalPrice = calculatePrice(point);
+        });
+        filteredTasks.sort(sortPointPrice);
+        filteredTasks.forEach((point) => delete point.totalPrice);
+        break;
     }
 
     return filteredTasks;
@@ -79,7 +98,8 @@ export default class TripPresenter {
     const pointPresenter = new PointPresenter({
       tripPointContainer: this.#tripComponent.element,
       onModeChange: this.#handleModeChange,
-      onDataChange: this.#handleViewAction
+      onDataChange: this.#handleViewAction,
+      apiModel: this.#apiModel
     });
 
     pointPresenter.init(point);
@@ -103,7 +123,7 @@ export default class TripPresenter {
       onSortTypeChange: this.#handleSortTypeChange
     });
 
-    render(this.#sortComponent, this.#tripComponent.element, RenderPosition.AFTERBEGIN);
+    render(this.#sortComponent, this.#sortContainer, RenderPosition.AFTERBEGIN);
   }
 
   #handleModeChange = () => {
@@ -116,6 +136,7 @@ export default class TripPresenter {
     this.#pointPresenter.forEach((presenter) => presenter.destroy());
     this.#pointPresenter.clear();
 
+    remove(this.#loadingComponent);
     remove(this.#sortComponent);
     if (this.#noPointComponent) {
       remove(this.#noPointComponent);
@@ -135,21 +156,43 @@ export default class TripPresenter {
       points.forEach((point) => {
         this.#renderPoint(point);
       });
+      if (this.#isLoading) {
+        this.#renderLoading();
+      }
     }
   }
 
-  #handleViewAction = (actionType, updateType, update) => {
+  #handleViewAction = async (actionType, updateType, update) => {
+    this.#uiBlocker.block();
+
     switch (actionType) {
       case UserAction.UPDATE_POINT:
-        this.#waypointModel.updatePoint(updateType, update);
+        this.#pointPresenter.get(update.id).setSaving();
+        try {
+          await this.#apiModel.updatePoint(updateType, update);
+        } catch (err) {
+          this.#pointPresenter.get(update.id).setAborting();
+        }
         break;
       case UserAction.ADD_POINT:
-        this.#waypointModel.addPoint(updateType, update);
+        this.#newPointPresenter.setSaving();
+        try {
+          await this.#apiModel.addPoint(updateType, update);
+        } catch (err) {
+          this.#newPointPresenter.setAborting();
+        }
         break;
       case UserAction.DELETE_POINT:
-        this.#waypointModel.deletePoint(updateType, update);
+        this.#pointPresenter.get(update.id).setDeleting();
+        try {
+          await this.#apiModel.deletePoint(updateType, update);
+        } catch (err) {
+          this.#pointPresenter.get(update.id).setAborting();
+        }
         break;
     }
+
+    this.#uiBlocker.unblock();
   };
 
   #handleModelEvent = (updateType, data) => {
@@ -162,10 +205,20 @@ export default class TripPresenter {
         this.#renderBoard();
         break;
       case UpdateType.MAJOR:
-        this.#clearBoard({ resetRenderedTaskCount: true, resetSortType: true });
+        this.#clearBoard({ resetSortType: true });
+        this.#renderBoard();
+        break;
+      case UpdateType.INIT:
+        this.#isLoading = false;
+        remove(this.#loadingComponent);
+        this.#clearBoard();
         this.#renderBoard();
         break;
     }
   };
+
+  #renderLoading() {
+    render(this.#loadingComponent, this.#tripComponent.element, RenderPosition.AFTERBEGIN);
+  }
 
 }

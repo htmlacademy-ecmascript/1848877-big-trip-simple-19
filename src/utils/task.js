@@ -1,5 +1,4 @@
 import dayjs from 'dayjs';
-//import {offersType} from '../mock/waypoints.js';
 
 export const humanizeEventDate = (date) => dayjs(date).format('MMM DD');
 
@@ -37,14 +36,19 @@ export const sortPointPrice = (pointA, pointB) => {
 
 export const isDatesEqual = (dateA, dateB) => (dateA === null && dateB === null) || dayjs(dateA).isSame(dateB, 'D');
 
-/*export const calculatePrice = (point) => {
-  let price = point.basePrice;
+export const calculatePrice = ({type, offers, basePrice, offerTypes}) => {
+  let price = basePrice;
   //находим нужный список offers, соответствуйщий типу
-  const pointTypeOffer = offersType.find((offer) => offer.type === point.type).offers;
+  const pointType = (offerTypes || []).find((offer) => offer.type === type);
+  const pointTypeOffers = pointType && pointType.offers || [];
   //проходимся по списку, ищем подходящий offers, совпадающий по id и забираем нужную цену
-  point.offers.map((elem) => {
-    const offerPrice = pointTypeOffer.find((offer) => offer.id === elem)//.price; почему-то не читает значение price выдает ошибку
+  offers.forEach((elem) => {
+    const offerTarget = pointTypeOffers.find(
+      (offer) => offer.id === elem
+    )
+    const offerPrice = offerTarget && offerTarget.price || 0; //почему-то не читает значение price выдает ошибку
     price += offerPrice;
   });
-  return price;
-};*/
+  return price || 0;
+};
+

@@ -2,6 +2,8 @@ import { render, replace, remove } from '../framework/render.js';
 import PointEditView from '../view/point-edit-view.js';
 import TripEventListView from '../view/trip-event-list-view.js';
 import {UserAction, UpdateType} from '../const.js';
+import { isDatesEqual } from '../utils/task.js';
+import { calculatePrice } from '../utils/task.js';
 
 const Mode = {
   DEFAULT: 'DEFAULT',
@@ -20,10 +22,11 @@ export default class PointPresenter {
 
   #handleModeChange = null;
   #mode = Mode.DEFAULT;
-
+  #apiModel = null;
   #handleDataChange = null;
 
-  constructor({tripPointContainer, onModeChange, onDataChange}) {
+  constructor({tripPointContainer, onModeChange, onDataChange, apiModel}) {
+    this.#apiModel = apiModel;
     this.#tripPointContainer = tripPointContainer;
     this.#handleModeChange = onModeChange;
     this.#handleDataChange = onDataChange;
@@ -41,7 +44,8 @@ export default class PointPresenter {
       point: this.#point,
       offers: this.#offers,
       destination: this.#destination,
-      onEditClick: this.#handleEditClick
+      onEditClick: this.#handleEditClick,
+      apiModel: this.#apiModel
     });
 
     this.#pointEditComponent = new PointEditView({
@@ -51,6 +55,7 @@ export default class PointPresenter {
       onFormSubmit: this.#formSubmitHandler,
       onFormClose: this.#closeEventEditFormHandler,
       onDeleteClick: this.#deleteClickHandler,
+      apiModel: this.#apiModel
     });
 
 
@@ -65,6 +70,7 @@ export default class PointPresenter {
 
     if (this.#mode === Mode.EDITING) { {
       replace(this.#pointEditComponent, prevPointEditComponent);
+      this.#mode = Mode.DEFAULT;
     } }
 
     remove(prevPointComponent);
@@ -108,14 +114,16 @@ export default class PointPresenter {
     this.#replacePointToForm();
   };
 
-  #formSubmitHandler = (point, offers, destination) => {
+  #formSubmitHandler = (update) => {
+    const isPatchUpdate =
+      isDatesEqual(this.#point.dateFrom, update.dateFrom) &&
+      calculatePrice(this.#point) === calculatePrice(update);
+
     this.#handleDataChange(
       UserAction.UPDATE_POINT,
-      UpdateType.MINOR,
-      point,
-      offers,
-      destination);
-    this.#replaceFormToPoit();
+      isPatchUpdate ? UpdateType.PATCH : UpdateType.MINOR,
+      update,
+    );
   };
 
   #closeEventEditFormHandler = () => {
@@ -130,4 +138,37 @@ export default class PointPresenter {
       point,
     );
   };
+
+  setSaving() {
+    this.#pointEditComponent.updateElement({
+      isDisabled: true,
+      isSaving: true,
+    });
+  }
+
+  setDeleting() {
+    if (this.#mode === Mode.EDITING) {
+      this.#pointEditComponent.updateElement({
+        isDisabled: true,
+        isDeleting: true,
+      });
+    }
+  }
+
+  setAborting() {
+    if (this.#mode === Mode.DEFAULT) {
+      this.#pointComponent.shake();
+      return;
+    }
+
+    const resetFormState = () => {
+      this.#pointEditComponent.updateElement({
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false,
+      });
+    };
+
+    this.#pointEditComponent.shake(resetFormState);
+  }
 }
