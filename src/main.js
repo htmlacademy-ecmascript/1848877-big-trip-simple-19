@@ -1,16 +1,44 @@
-import {render} from './framework/render.js';
-import FilterView from '../src/view/filter-view.js';
 import TripPresenter from '../src/presenter/trip-presenter.js';
 import WaypointsModel from '../src/model/waypoints-model.js';
-import {generateFilter} from '../src/mock/filter.js';
+import FilterModel from './model/filter-model.js';
+import FilterPresenter from './presenter/filter-presenter.js';
+import NewPointButtonView from './view/new-point-button-view.js';
+import { render } from './framework/render.js';
 
 const waypointModel = new WaypointsModel();
-
+const filterModel = new FilterModel();
 const tripEventsElement = document.querySelector('.trip-events');
 const headerFiltersElement = document.querySelector('.trip-controls__filters');
-const tripPresenter = new TripPresenter({tripContainer: tripEventsElement, waypointModel});
-const filters = generateFilter(waypointModel.waypoints);
+const siteHeaderElement = document.querySelector('.main__control');
 
-render(new FilterView({filters}), headerFiltersElement);
+const tripPresenter = new TripPresenter({
+  tripContainer: tripEventsElement,
+  waypointModel,
+  filterModel,
+  onNewPointDestroy: handleNewPointFormClose
+});
 
+const filterPresenter = new FilterPresenter({
+  filterContainer: headerFiltersElement,
+  filterModel,
+  pointsModel: waypointModel
+});
+
+const newTaskButtonComponent = new NewPointButtonView({
+  onClick: handleNewPointButtonClick
+});
+
+function handleNewPointFormClose() {
+  newTaskButtonComponent.element.disabled = false;
+}
+
+function handleNewPointButtonClick() {
+  tripPresenter.createPoint();
+  newTaskButtonComponent.element.disabled = true;
+}
+
+render(newTaskButtonComponent, siteHeaderElement);
+
+filterPresenter.init();
 tripPresenter.init();
+

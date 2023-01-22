@@ -14,6 +14,6 @@ export const getRandomElementOfArray = (arr) => {
 
 export const getRndInteger = (min, max) => Math.floor(Math.random() * (max - min) ) + min;
 
-export const updateItem = (items, update) => items.map((item) => item.uniqueId === update.uniqueId ? update : item);
+/*export const updateItem = (items, update) => items.map((item) => item.uniqueId === update.uniqueId ? update : item);*/
 
 export const getRandomNumber = (min, max) => Math.floor(Math.random() * (max - min + 1) + min);
