@@ -23,10 +23,8 @@ export default class PointCommonModel extends Observable {
       ]);
       this.#pointCommon = { allOffers, allDestinations };
       this._notify(UpdateType.INIT_POINT_COMMON);
-      console.log('API INIT common', this.#pointCommon);
     } catch (err) {
       this._notify(UpdateType.ERROR_LOADING);
-      console.error(err);
       throw new Error('Error loading data from server');
     }
   }

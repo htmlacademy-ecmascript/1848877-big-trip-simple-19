@@ -2,7 +2,6 @@ import { render, replace, remove } from '../framework/render.js';
 import PointEditView from '../view/point-edit-view.js';
 import TripEventListView from '../view/trip-event-list-view.js';
 import {UserAction, UpdateType} from '../const.js';
-import { isDatesEqual } from '../utils/task.js';
 
 const Mode = {
   DEFAULT: 'DEFAULT',
@@ -115,12 +114,9 @@ export default class PointPresenter {
   };
 
   #formSubmitHandler = (update) => {
-    const isPatchUpdate =
-      isDatesEqual(this.#point.dateFrom, update.dateFrom);
-
     this.#handleDataChange(
       UserAction.UPDATE_POINT,
-      isPatchUpdate ? UpdateType.PATCH : UpdateType.MINOR,
+      UpdateType.MINOR,
       update,
     );
   };

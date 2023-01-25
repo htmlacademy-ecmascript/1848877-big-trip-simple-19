@@ -243,12 +243,11 @@ export default class TripPresenter {
     if (this.#isErrorLoading) {
       this.#renderErrorLoading();
     }
-    if (this.#isPointLoading || this.#isPointCommonLoading) {
+    if ((this.#isPointLoading || this.#isPointCommonLoading) && !this.#isErrorLoading) {
       this.#renderLoading();
     }
     const points = this.points;
     const pointsCount = this.points.length;
-    console.log(points);
     if (pointsCount === 0) {
       this.#renderNoPoint();
     } else {

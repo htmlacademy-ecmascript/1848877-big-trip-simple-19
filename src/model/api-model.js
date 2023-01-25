@@ -17,12 +17,10 @@ export default class ApiModel extends Observable {
   async init() {
     try {
       const points = await this.#pointsApiService.points;
-      console.log('API INIT points', points);
       this.#points = points.map(this.#adaptToClient);
     } catch (err) {
       this.#points = [];
       this._notify(UpdateType.ERROR_LOADING);
-      console.error(err);
       throw new Error('Error loading data from server');
     }
     this._notify(UpdateType.INIT_POINT);

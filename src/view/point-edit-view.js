@@ -252,9 +252,9 @@ export default class PointEditView extends AbstractStatefulView {
     if (regex.test(evt.target.value)) {
       inputPrice = evt.target.value;
     }
-    if (evt.target.value === '') { evt.target.value = '1'; }
-    evt.target.value = isNaN(inputPrice) ? this._state.basePrice : inputPrice;
-    this._state.basePrice = evt.target.value;
+    if (evt.target.value === '') { inputPrice = 1; }
+    inputPrice = isNaN(inputPrice) ? this._state.basePrice : inputPrice;
+    this._state.basePrice = inputPrice;
   };
 
   #pointTypeChangeHandler = (evt) => {
