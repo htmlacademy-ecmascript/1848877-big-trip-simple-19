@@ -3,7 +3,6 @@ import PointEditView from '../view/point-edit-view.js';
 import TripEventListView from '../view/trip-event-list-view.js';
 import {UserAction, UpdateType} from '../const.js';
 import { isDatesEqual } from '../utils/task.js';
-import { calculatePrice } from '../utils/task.js';
 
 const Mode = {
   DEFAULT: 'DEFAULT',
@@ -23,13 +22,15 @@ export default class PointPresenter {
   #handleModeChange = null;
   #mode = Mode.DEFAULT;
   #apiModel = null;
+  #pointCommon = null;
   #handleDataChange = null;
 
-  constructor({tripPointContainer, onModeChange, onDataChange, apiModel}) {
+  constructor({tripPointContainer, pointCommon, onModeChange, onDataChange, apiModel}) {
     this.#apiModel = apiModel;
     this.#tripPointContainer = tripPointContainer;
     this.#handleModeChange = onModeChange;
     this.#handleDataChange = onDataChange;
+    this.#pointCommon = pointCommon;
   }
 
   init(point) {
@@ -42,10 +43,8 @@ export default class PointPresenter {
 
     this.#pointComponent = new TripEventListView({
       point: this.#point,
-      offers: this.#offers,
-      destination: this.#destination,
       onEditClick: this.#handleEditClick,
-      apiModel: this.#apiModel
+      pointCommon: this.#pointCommon,
     });
 
     this.#pointEditComponent = new PointEditView({
@@ -55,7 +54,8 @@ export default class PointPresenter {
       onFormSubmit: this.#formSubmitHandler,
       onFormClose: this.#closeEventEditFormHandler,
       onDeleteClick: this.#deleteClickHandler,
-      apiModel: this.#apiModel
+      apiModel: this.#apiModel,
+      pointCommon: this.#pointCommon,
     });
 
 
@@ -116,8 +116,7 @@ export default class PointPresenter {
 
   #formSubmitHandler = (update) => {
     const isPatchUpdate =
-      isDatesEqual(this.#point.dateFrom, update.dateFrom) &&
-      calculatePrice(this.#point) === calculatePrice(update);
+      isDatesEqual(this.#point.dateFrom, update.dateFrom);
 
     this.#handleDataChange(
       UserAction.UPDATE_POINT,
@@ -127,8 +126,8 @@ export default class PointPresenter {
   };
 
   #closeEventEditFormHandler = () => {
+    this.#pointEditComponent.reset(this.#point);
     this.#replaceFormToPoit();
-    document.removeEventListener('keydown', this.#escKeyDownHandler);
   };
 
   #deleteClickHandler = (point) => {
@@ -140,10 +139,11 @@ export default class PointPresenter {
   };
 
   setSaving() {
-    this.#pointEditComponent.updateElement({
+    if (this.#mode === Mode.EDITING)
+    {this.#pointEditComponent.updateElement({
       isDisabled: true,
       isSaving: true,
-    });
+    });}
   }
 
   setDeleting() {

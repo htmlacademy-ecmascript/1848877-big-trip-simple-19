@@ -5,13 +5,20 @@ import FilterPresenter from './presenter/filter-presenter.js';
 import NewPointButtonView from './view/new-point-button-view.js';
 import { render } from './framework/render.js';
 import PointsApiService from './points-api-service.js';
+import PointCommonModel from './model/point-common-model.js';
+import PointCommonApiService from './point-common-api-service.js';
 
-const AUTHORIZATION = 'Basic err883jdzbdw';
-const END_POINT = 'https://19.ecmascript.pages.academy/big-trip-simple/';
+const AUTHORIZATION = 'Basic err883jdzbdv';
+const END_POINT = 'https://19.ecmascript.pages.academy/big-trip-simple';
 
 const apiModel = new ApiModel({
   pointsApiService: new PointsApiService(END_POINT, AUTHORIZATION)
 });
+
+const pointCommonModel = new PointCommonModel({
+  pointCommonApiService: new PointCommonApiService(END_POINT, AUTHORIZATION)
+});
+
 const filterModel = new FilterModel();
 const tripEventsContentElement = document.querySelector('.trip-events__content');
 const tripEventsSortElement = document.querySelector('.trip-events__sort');
@@ -22,6 +29,7 @@ const tripPresenter = new TripPresenter({
   tripContainer: tripEventsContentElement,
   sortContainer: tripEventsSortElement,
   apiModel,
+  pointCommonModel,
   filterModel,
   onNewPointDestroy: handleNewPointFormClose
 });
@@ -32,24 +40,24 @@ const filterPresenter = new FilterPresenter({
   apiModel
 });
 
-const newTaskButtonComponent = new NewPointButtonView({
+const newPointButtonComponent = new NewPointButtonView({
   onClick: handleNewPointButtonClick
 });
 
 function handleNewPointFormClose() {
-  newTaskButtonComponent.element.disabled = false;
+  newPointButtonComponent.element.disabled = false;
 }
 
 function handleNewPointButtonClick() {
   tripPresenter.createPoint();
-  newTaskButtonComponent.element.disabled = true;
+  newPointButtonComponent.element.disabled = true;
 }
-
-render(newTaskButtonComponent, siteHeaderElement);
 
 filterPresenter.init();
 tripPresenter.init();
-apiModel.init()
-  .finally(() => {
-    render(newTaskButtonComponent, siteHeaderElement);
+Promise.all([
+  apiModel.init(),
+  pointCommonModel.init()])
+  .then(() => {
+    render(newPointButtonComponent, siteHeaderElement);
   });

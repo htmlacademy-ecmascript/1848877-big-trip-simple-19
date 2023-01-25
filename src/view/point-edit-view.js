@@ -2,9 +2,17 @@ import dayjs from 'dayjs';
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
-import { BLANK_POINT } from '../presenter/new-point-presenter.js';
+import { TYPES } from '../const.js';
 
 const DATE_FORMAT = 'DD/MM/YY HH:mm';
+
+export const BLANK_POINT = {
+  basePrice: 1,
+  destination: -1,
+  id:0,
+  offers: [],
+  type: TYPES[0]
+};
 
 function getPicturesListTemplate(pointDestination) {
   let template = '';
@@ -64,16 +72,15 @@ function createSectionOffersEditTemplate(offerTypes, offer, type) {
 }
 
 
-function createPointEditTemplate(tripPoint, apiModel) {
-  const {destinations, offerTypes} = apiModel;
-  const chooseDestination = destinations.map((element) => `<option value="${element.name}">`).join('');
-
+function createPointEditTemplate(tripPoint, pointCommon) {
+  const isNewPoint = !('id' in tripPoint);
   const { offers, type, dateFrom, dateTo, destination, basePrice, id, isDisabled, isSaving, isDeleting } = tripPoint;
 
+  const chooseDestination = pointCommon.allDestinations.map((element) => `<option value="${element.name}">`).join('');
   const parceDateStart = dayjs(dateFrom);
   const parceDateEnd = dayjs(dateTo);
-  const pointDestination = destinations.find((item) => destination === item.id);
-  const pointTypeOffer = offerTypes.find((offer) => offer.type === type);
+  const pointDestination = pointCommon.allDestinations.find((item) => destination === item.id);
+  const pointTypeOffer = pointCommon.allOffers.find((offer) => offer.type === type);
 
   return (`
 <li class="trip-events__item">
@@ -89,7 +96,7 @@ function createPointEditTemplate(tripPoint, apiModel) {
         <div class="event__type-list">
           <fieldset class="event__type-group">
             <legend class="visually-hidden">Event type</legend>
-            ${createEventTypeItemEditTemplate(offerTypes)}
+            ${createEventTypeItemEditTemplate(pointCommon.allOffers)}
           </fieldset>
         </div>
       </div>
@@ -128,10 +135,16 @@ function createPointEditTemplate(tripPoint, apiModel) {
       </div>
 
       <button class="event__save-btn  btn  btn--blue" type="submit" ${isDisabled ? 'disabled' : ''}>${isSaving ? 'Saving...' : 'Save'}</button>
-      <button class="event__reset-btn" type="reset" ${isDisabled ? 'disabled' : ''}>${isDeleting ? 'Deleting...' : 'Delete'}</button>
+      ${isNewPoint ? `
+      <button class="event__reset-btn" type="reset" ${isDisabled ? 'disabled' : ''}>Cancel</button>
+      ` : `
+      <button class="event__reset-btn" type="reset" ${isDisabled ? 'disabled' : ''}>
+        ${isDeleting ? 'Deleting...' : 'Delete'}
+      </button>
       <button class="event__rollup-btn" type="button" ${isDisabled ? 'disabled' : ''}>
         <span class="visually-hidden">Open event</span>
       </button>
+      `}
     </header>
     <section class="event__details">
       <section class="event__section  event__section--offers">
@@ -167,38 +180,46 @@ export default class PointEditView extends AbstractStatefulView {
   #handleDeleteClick = null;
   #apiModel = null;
   #tripPoint = null;
+  #pointCommon = null;
 
   constructor({ point = {
     ...BLANK_POINT,
     dateFrom: new Date(),
     dateTo: new Date(),
-  }, onFormSubmit, onFormClose, offers, destination, onDeleteClick, apiModel}) {
+  }, onFormSubmit, onFormClose, offers, destination, onDeleteClick, apiModel, pointCommon}) {
     super();
     this.#apiModel = apiModel;
     this.#tripPoint = point;
     this._setState(PointEditView.parsePointToState(point));
+    this.#pointCommon = pointCommon;
     this.#handleFormSubmit = onFormSubmit;
     this.#handleFormClose = onFormClose;
     this.#offers = offers;
-    this.#destination = this.#apiModel.destinations.find((item) => destination === item.id);
+    this.#destination = pointCommon.allDestinations.find((item) => destination === item.id);
     this.#handleDeleteClick = onDeleteClick;
 
     this._restoreHandlers();
   }
 
   get template() {
-    return createPointEditTemplate(this._state, this.#apiModel);
+    return createPointEditTemplate(this._state, this.#pointCommon);
   }
 
   _restoreHandlers() {
     this.element.querySelector('form')
       .addEventListener('submit', this.#formSubmitHandler);
-    this.element.querySelector('.event__rollup-btn')
-      .addEventListener('click', this.#formCloseHandler);
+    const rollupButtonElement = this.element.querySelector('.event__rollup-btn');
+    if (rollupButtonElement) {
+      this.element.querySelector('.event__rollup-btn')
+        .addEventListener('click', this.#formCloseHandler);
+    }
     this.element.querySelector('.event__reset-btn')
       .addEventListener('click', this.#deleteClickHandler);
-    this.element.querySelector('.event__available-offers')
-      .addEventListener('change', this.#offerChangeHandler);
+    if (this.#pointCommon.allOffers.find((offerTypes) => offerTypes.type === this._state.type).offers)
+    {
+      this.element.querySelector('.event__available-offers')
+        .addEventListener('change', this.#offerChangeHandler);
+    }
     this.element.querySelector('.event__input--price')
       .addEventListener('input', this.#priceInputHandler);
     this.element.querySelector('.event__type-group')
@@ -231,7 +252,7 @@ export default class PointEditView extends AbstractStatefulView {
     if (regex.test(evt.target.value)) {
       inputPrice = evt.target.value;
     }
-    if (evt.target.value === '') { evt.target.value = '0'; }
+    if (evt.target.value === '') { evt.target.value = '1'; }
     evt.target.value = isNaN(inputPrice) ? this._state.basePrice : inputPrice;
     this._state.basePrice = evt.target.value;
   };
@@ -247,7 +268,7 @@ export default class PointEditView extends AbstractStatefulView {
 
   #destinationChangeHandler = (evt) => {
     evt.preventDefault();
-    const pointDestination = this.#apiModel.destinations.find((item) => evt.target.value === item.name);
+    const pointDestination = this.#pointCommon.allDestinations.find((item) => evt.target.value === item.name);
     const destId = pointDestination === undefined ? -1 : pointDestination.id;
     this.updateElement({
       destination: destId,
@@ -256,7 +277,7 @@ export default class PointEditView extends AbstractStatefulView {
 
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
-    this.#handleFormSubmit(PointEditView.parseStateToPoint(this._state), this.#offers, this.#destination);
+    this.#handleFormSubmit(PointEditView.parseStateToPoint(this._state));
   };
 
   #formCloseHandler = () => {

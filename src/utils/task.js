@@ -36,19 +36,4 @@ export const sortPointPrice = (pointA, pointB) => {
 
 export const isDatesEqual = (dateA, dateB) => (dateA === null && dateB === null) || dayjs(dateA).isSame(dateB, 'D');
 
-export const calculatePrice = ({type, offers, basePrice, offerTypes}) => {
-  let price = basePrice;
-  //находим нужный список offers, соответствуйщий типу
-  const pointType = (offerTypes || []).find((offer) => offer.type === type);
-  const pointTypeOffers = pointType && pointType.offers || [];
-  //проходимся по списку, ищем подходящий offers, совпадающий по id и забираем нужную цену
-  offers.forEach((elem) => {
-    const offerTarget = pointTypeOffers.find(
-      (offer) => offer.id === elem
-    )
-    const offerPrice = offerTarget && offerTarget.price || 0; //почему-то не читает значение price выдает ошибку
-    price += offerPrice;
-  });
-  return price || 0;
-};
 

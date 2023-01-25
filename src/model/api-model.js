@@ -4,8 +4,6 @@ import { UpdateType } from '../const.js';
 export default class ApiModel extends Observable {
   #pointsApiService = null;
   #points = [];
-  #offerTypes = [];
-  #destinations = [];
 
   constructor({ pointsApiService }) {
     super();
@@ -16,48 +14,18 @@ export default class ApiModel extends Observable {
     return this.#points;
   }
 
-  get offerTypes() {
-    return this.#offerTypes;
-  }
-
-  get destinations() {
-    return this.#destinations;
-  }
-
   async init() {
     try {
       const points = await this.#pointsApiService.points;
       console.log('API INIT points', points);
       this.#points = points.map(this.#adaptToClient);
-      this._notify(UpdateType.INIT);
     } catch (err) {
       this.#points = [];
       this._notify(UpdateType.ERROR_LOADING);
       console.error(err);
       throw new Error('Error loading data from server');
     }
-    try {
-      const offerTypes = await this.#pointsApiService.offerTypes;
-      console.log('API INIT offerTypes', offerTypes);
-      this.#offerTypes = offerTypes.map(this.#adaptToClient);
-      this._notify(UpdateType.INIT);
-    } catch (err) {
-      this.#offerTypes = [];
-      this._notify(UpdateType.ERROR_LOADING);
-      console.error(err);
-      throw new Error('Error loading data from server');
-    }
-    try {
-      const destinations = await this.#pointsApiService.destinations;
-      console.log('API INIT destinations', destinations);
-      this.#destinations = destinations.map(this.#adaptToClient);
-      this._notify(UpdateType.INIT);
-    } catch (err) {
-      this.#destinations = [];
-      this._notify(UpdateType.ERROR_LOADING);
-      console.error(err);
-      throw new Error('Error loading data from server');
-    }
+    this._notify(UpdateType.INIT_POINT);
   }
 
   async updatePoint(updateType, update) {

@@ -1,44 +1,32 @@
 import AbstractView from '../framework/view/abstract-view.js';
-import { humanizeEventDate, humanizeEventTime, calculatePrice} from '../utils/task.js';
+import { humanizeEventDate, humanizeEventTime } from '../utils/task.js';
 
-function createTripEventListTemplate(tripPoint, apiModel) {
-  const {offerTypes, destinations} = apiModel;
-  const {offers, type, dateFrom, dateTo, destination, basePrice} = tripPoint;
+function createTripEventListTemplate(tripPoint, pointCommon) {
+  const { offers, type, dateFrom, dateTo, destination, basePrice } = tripPoint;
 
-  let totalPrice = 0;
-  try {
-    totalPrice = calculatePrice({type, offers, basePrice, offerTypes});
-  } catch (err) {
-    console.error('error', err);
-  }
-  const pointDestination = destinations.find((item) => destination === item.id);
-  const checkedOffers = offers.map((element) => element.id);
+  const pointDestination = pointCommon.allDestinations.find((item) => destination === item.id);
 
   const offersTemplate = () => {
-    if (!checkedOffers.length) {
-      return (
-        `<li class="event__offer">
-          <span class="event__offer-title">No additional offers</span>
-        </li>`
-      );
-    } else {
-      const template = offers.map((elem) => {
-        const targetOfferType = (offerTypes || [])
-          .find((offerType) => offerType.type === type);
-        const targetOffer = targetOfferType
-          ? targetOfferType.offers.find((offer) => offer.id === elem)
-          : null;
+    let template = `<li class="event__offer">
+    <span class="event__offer-title">
+    No additional offers</span>
+  </li>`;
+    if (offers.length) {
+      template = offers.map((elem) => {
+        const offerTypes = pointCommon.allOffers.find((offerType) => offerType.type === type);
+        const selectedOffer = offerTypes.offers.find((offer) => offer.id === elem);
+
         return (`
           <li class="event__offer">
-            <span class="event__offer-title">${targetOffer ? targetOffer.title : '-'}</span>
+            <span class="event__offer-title">${selectedOffer.title}</span>
             &plus;&euro;&nbsp;
-            <span class="event__offer-price">${targetOffer ? targetOffer.price : '-'}</span>
+            <span class="event__offer-price">${selectedOffer.price}</span>
           </li>`
-        );
-      }).join('');
-
-      return template;
+        );}).join('');
     }
+
+    return template;
+
   };
 
   return (`
@@ -58,7 +46,7 @@ function createTripEventListTemplate(tripPoint, apiModel) {
             </p>
           </div>
           <p class="event__price">
-            &euro;&nbsp;<span class="event__price-value">${totalPrice}</span>
+            &euro;&nbsp;<span class="event__price-value">${basePrice}</span>
           </p>
           <h4 class="visually-hidden">Offers:</h4>
           <ul class="event__selected-offers">
@@ -77,27 +65,23 @@ function createTripEventListTemplate(tripPoint, apiModel) {
 export default class TripEventListView extends AbstractView {
   #tripPoint = null;
   #handleEditClick = null;
-  #offers = null;
-  #destination = null;
-  #apiModel = null;
+  #pointCommon = null;
 
-  constructor({point, onEditClick, offers, destination, apiModel}) {
+  constructor({ point, onEditClick, pointCommon }) {
     super();
-    this.#apiModel = apiModel;
+    this.#pointCommon = pointCommon;
     this.#tripPoint = point;
-    this.#offers = offers;
     this.#handleEditClick = onEditClick;
-    this.#destination = (apiModel.destinations || []).find((item) => destination === item.id);
     this.element.querySelector('.event__rollup-btn')
       .addEventListener('click', this.#editClickHandler);
   }
 
   get template() {
-    return createTripEventListTemplate(this.#tripPoint, this.#apiModel);
+    return createTripEventListTemplate(this.#tripPoint, this.#pointCommon);
   }
 
   #editClickHandler = (evt) => {
     evt.preventDefault();
-    this.#handleEditClick(this.#tripPoint, this.#offers, this.#destination);
+    this.#handleEditClick();
   };
 }
