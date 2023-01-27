@@ -214,7 +214,6 @@ export default class TripPresenter {
       tripPointContainer: this.#tripComponent.element,
       onModeChange: this.#handleModeChange,
       onDataChange: this.#handleViewAction,
-      apiModel: this.#apiModel,
       pointCommon: this.#pointCommon,
     });
 

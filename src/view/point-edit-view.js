@@ -174,29 +174,21 @@ function createPointEditTemplate(tripPoint, pointCommon) {
 export default class PointEditView extends AbstractStatefulView {
   #handleFormSubmit = null;
   #handleFormClose = null;
-  #offers = null;
-  #destination = null;
   #datepickerFrom = null;
   #datepickerTo = null;
   #handleDeleteClick = null;
-  #apiModel = null;
-  #tripPoint = null;
   #pointCommon = null;
 
   constructor({ point = {
     ...BLANK_POINT,
     dateFrom: new Date(),
     dateTo: new Date(),
-  }, onFormSubmit, onFormClose, offers, destination, onDeleteClick, apiModel, pointCommon}) {
+  }, onFormSubmit, onFormClose, onDeleteClick, pointCommon}) {
     super();
-    this.#apiModel = apiModel;
-    this.#tripPoint = point;
     this._setState(PointEditView.parsePointToState(point));
     this.#pointCommon = pointCommon;
     this.#handleFormSubmit = onFormSubmit;
     this.#handleFormClose = onFormClose;
-    this.#offers = offers;
-    this.#destination = pointCommon.allDestinations.find((item) => destination === item.id);
     this.#handleDeleteClick = onDeleteClick;
 
     this._restoreHandlers();
