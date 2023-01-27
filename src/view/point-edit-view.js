@@ -9,7 +9,6 @@ const DATE_FORMAT = 'DD/MM/YY HH:mm';
 export const BLANK_POINT = {
   basePrice: 1,
   destination: -1,
-  id:0,
   offers: [],
   type: TYPES[0]
 };
