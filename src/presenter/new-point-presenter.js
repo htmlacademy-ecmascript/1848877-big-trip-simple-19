@@ -1,16 +1,6 @@
 import { remove, render, RenderPosition } from '../framework/render.js';
 import PointEditView from '../view/point-edit-view.js';
-import { UserAction, UpdateType, TYPES } from '../const.js';
-
-const BLANK_POINT = {
-  basePrice: 0,
-  dateFrom: new Date(),
-  dateTo: new Date(),
-  destination: -1,
-  id:0,
-  offers: [],
-  type: TYPES[0]
-};
+import { UserAction, UpdateType} from '../const.js';
 
 export default class NewPointPresenter {
   #pointListContainer = null;
@@ -18,11 +8,13 @@ export default class NewPointPresenter {
   #handleDestroy = null;
 
   #pointEditComponent = null;
+  #pointCommon = null;
 
-  constructor({pointListContainer, onDataChange, onDestroy}) {
+  constructor({pointListContainer, pointCommon, onDataChange, onDestroy}) {
     this.#pointListContainer = pointListContainer;
     this.#handleDataChange = onDataChange;
     this.#handleDestroy = onDestroy;
+    this.#pointCommon = pointCommon;
   }
 
   init() {
@@ -31,9 +23,9 @@ export default class NewPointPresenter {
     }
 
     this.#pointEditComponent = new PointEditView({
+      pointCommon: this.#pointCommon,
       onFormSubmit: this.#handleFormSubmit,
       onDeleteClick: this.#handleDeleteClick,
-      point: BLANK_POINT,
     });
 
     render(this.#pointEditComponent, this.#pointListContainer, RenderPosition.AFTERBEGIN);
@@ -54,6 +46,13 @@ export default class NewPointPresenter {
     document.removeEventListener('keydown', this.#escKeyDownHandler);
   }
 
+  setSaving() {
+    this.#pointEditComponent.updateElement({
+      isDisabled: true,
+      isSaving: true,
+    });
+  }
+
   #handleFormSubmit = (point) => {
     this.#handleDataChange(
       UserAction.ADD_POINT,
@@ -72,4 +71,16 @@ export default class NewPointPresenter {
       this.destroy();
     }
   };
+
+  setAborting() {
+    const resetFormState = () => {
+      this.#pointEditComponent.updateElement({
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false,
+      });
+    };
+
+    this.#pointEditComponent.shake(resetFormState);
+  }
 }

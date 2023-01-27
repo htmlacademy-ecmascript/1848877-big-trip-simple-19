@@ -20,13 +20,16 @@ export default class PointPresenter {
 
   #handleModeChange = null;
   #mode = Mode.DEFAULT;
-
+  #apiModel = null;
+  #pointCommon = null;
   #handleDataChange = null;
 
-  constructor({tripPointContainer, onModeChange, onDataChange}) {
+  constructor({tripPointContainer, pointCommon, onModeChange, onDataChange, apiModel}) {
+    this.#apiModel = apiModel;
     this.#tripPointContainer = tripPointContainer;
     this.#handleModeChange = onModeChange;
     this.#handleDataChange = onDataChange;
+    this.#pointCommon = pointCommon;
   }
 
   init(point) {
@@ -39,9 +42,8 @@ export default class PointPresenter {
 
     this.#pointComponent = new TripEventListView({
       point: this.#point,
-      offers: this.#offers,
-      destination: this.#destination,
-      onEditClick: this.#handleEditClick
+      onEditClick: this.#handleEditClick,
+      pointCommon: this.#pointCommon,
     });
 
     this.#pointEditComponent = new PointEditView({
@@ -51,6 +53,8 @@ export default class PointPresenter {
       onFormSubmit: this.#formSubmitHandler,
       onFormClose: this.#closeEventEditFormHandler,
       onDeleteClick: this.#deleteClickHandler,
+      apiModel: this.#apiModel,
+      pointCommon: this.#pointCommon,
     });
 
 
@@ -65,6 +69,7 @@ export default class PointPresenter {
 
     if (this.#mode === Mode.EDITING) { {
       replace(this.#pointEditComponent, prevPointEditComponent);
+      this.#mode = Mode.DEFAULT;
     } }
 
     remove(prevPointComponent);
@@ -108,19 +113,17 @@ export default class PointPresenter {
     this.#replacePointToForm();
   };
 
-  #formSubmitHandler = (point, offers, destination) => {
+  #formSubmitHandler = (update) => {
     this.#handleDataChange(
       UserAction.UPDATE_POINT,
       UpdateType.MINOR,
-      point,
-      offers,
-      destination);
-    this.#replaceFormToPoit();
+      update,
+    );
   };
 
   #closeEventEditFormHandler = () => {
+    this.#pointEditComponent.reset(this.#point);
     this.#replaceFormToPoit();
-    document.removeEventListener('keydown', this.#escKeyDownHandler);
   };
 
   #deleteClickHandler = (point) => {
@@ -130,4 +133,38 @@ export default class PointPresenter {
       point,
     );
   };
+
+  setSaving() {
+    if (this.#mode === Mode.EDITING)
+    {this.#pointEditComponent.updateElement({
+      isDisabled: true,
+      isSaving: true,
+    });}
+  }
+
+  setDeleting() {
+    if (this.#mode === Mode.EDITING) {
+      this.#pointEditComponent.updateElement({
+        isDisabled: true,
+        isDeleting: true,
+      });
+    }
+  }
+
+  setAborting() {
+    if (this.#mode === Mode.DEFAULT) {
+      this.#pointComponent.shake();
+      return;
+    }
+
+    const resetFormState = () => {
+      this.#pointEditComponent.updateElement({
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false,
+      });
+    };
+
+    this.#pointEditComponent.shake(resetFormState);
+  }
 }

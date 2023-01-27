@@ -4,15 +4,24 @@ import TripListView from '../view/trip-list-view.js';
 import NoEventsView from '../view/no-events-view.js';
 import PointPresenter from './point-presenter.js';
 import { SortType, UpdateType, UserAction, FilterType } from '../const.js';
-import { sortPointDate, sortPointPrice } from '../utils/task.js';
+import { sortPointDate, sortPointPrice} from '../utils/task.js';
 import { filter } from '../utils/filters.js';
 import NewPointPresenter from './new-point-presenter.js';
+import LoadingView from '../view/loading-view.js';
+import UiBlocker from '../framework/ui-blocker/ui-blocker.js';
+import ErrorLoadingView from '../view/error-loading-view.js';
+
+const TimeLimit = {
+  LOWER_LIMIT: 350,
+  UPPER_LIMIT: 1000,
+};
 
 export default class TripPresenter {
   #tripContainer = null;
-  #waypointModel = null;
+  #sortContainer = null;
+  #apiModel = null;
   #filterModel = null;
-
+  #loadingComponent = new LoadingView();
   #tripComponent = new TripListView();
   #noPointComponent = null;
   #newPointPresenter = null;
@@ -20,41 +29,51 @@ export default class TripPresenter {
   #currentSortType = SortType.DATE;
   #filterType = FilterType.ALL;
   #onNewPointDestroy = null;
-
+  #isErrorLoading = false;
   #pointPresenter = new Map();
+  #ErrorLoadingView = new ErrorLoadingView();
+  #isPointLoading = true;
+  #isPointCommonLoading = true;
+  #pointCommonModel = null;
+  #pointCommon = null;
+  #uiBlocker = new UiBlocker({
+    lowerLimit: TimeLimit.LOWER_LIMIT,
+    upperLimit: TimeLimit.UPPER_LIMIT
+  });
 
-  constructor({ tripContainer, waypointModel, filterModel, onNewPointDestroy }) {
+  constructor({ tripContainer, sortContainer, apiModel, pointCommonModel, filterModel, onNewPointDestroy }) {
+    this.#apiModel = apiModel;
     this.#tripContainer = tripContainer;
-    this.#waypointModel = waypointModel;
+    this.#sortContainer = sortContainer;
     this.#filterModel = filterModel;
     this.#onNewPointDestroy = onNewPointDestroy;
+    this.#pointCommonModel = pointCommonModel;
+    this.#pointCommon = this.#pointCommonModel.pointCommon;
 
-    this.#newPointPresenter = new NewPointPresenter({
-      pointListContainer: this.#tripComponent.element,
-      onDataChange: this.#handleViewAction,
-      onDestroy: this.#onNewPointDestroy,
-    });
-
-    this.#waypointModel.addObserver(this.#handleModelEvent);
+    this.#apiModel.addObserver(this.#handleModelEvent);
+    this.#pointCommonModel.addObserver(this.#handleModelEvent);
     this.#filterModel.addObserver(this.#handleModelEvent);
   }
 
   get points() {
     this.#filterType = this.#filterModel.filter;
-    const points = this.#waypointModel.waypoints;
+    const points = this.#apiModel.points;
     const filteredTasks = filter[this.#filterType](points);
 
     switch (this.#currentSortType) {
       case SortType.DATE:
-        return filteredTasks.sort(sortPointDate);
+        filteredTasks.sort(sortPointDate);
+        break;
       case SortType.PRICE:
-        return filteredTasks.sort(sortPointPrice);
+        filteredTasks.sort(sortPointPrice);
+        break;
     }
 
     return filteredTasks;
   }
 
   init() {
+    this.#clearBoard();
     this.#renderBoard();
   }
 
@@ -64,6 +83,14 @@ export default class TripPresenter {
     this.#newPointPresenter.init();
   }
 
+  #createNewPointPresenter () {
+    this.#newPointPresenter = new NewPointPresenter({
+      pointListContainer: this.#tripComponent.element,
+      pointCommon: this.#pointCommon,
+      onDataChange: this.#handleViewAction,
+      onDestroy: this.#onNewPointDestroy,
+    });
+  }
 
   #renderNoPoint() {
     this.#noPointComponent = new NoEventsView({
@@ -75,16 +102,80 @@ export default class TripPresenter {
       RenderPosition.AFTERBEGIN);
   }
 
-  #renderPoint(point) {
-    const pointPresenter = new PointPresenter({
-      tripPointContainer: this.#tripComponent.element,
-      onModeChange: this.#handleModeChange,
-      onDataChange: this.#handleViewAction
-    });
+  #handleModeChange = () => {
+    this.#newPointPresenter.destroy();
+    this.#pointPresenter.forEach((presenter) => presenter.resetView());
+  };
 
-    pointPresenter.init(point);
-    this.#pointPresenter.set(point.uniqueId, pointPresenter);
-  }
+  #handleViewAction = async (actionType, updateType, update) => {
+    this.#uiBlocker.block();
+
+    switch (actionType) {
+      case UserAction.UPDATE_POINT:
+        this.#pointPresenter.get(update.id).setSaving();
+        try {
+          await this.#apiModel.updatePoint(updateType, update);
+        } catch (err) {
+          this.#pointPresenter.get(update.id).setAborting();
+        }
+        break;
+      case UserAction.ADD_POINT:
+        this.#newPointPresenter.setSaving();
+        try {
+          await this.#apiModel.addPoint(updateType, update);
+        } catch (err) {
+          this.#newPointPresenter.setAborting();
+        }
+        break;
+      case UserAction.DELETE_POINT:
+        this.#pointPresenter.get(update.id).setDeleting();
+        try {
+          await this.#apiModel.deletePoint(updateType, update);
+        } catch (err) {
+          this.#pointPresenter.get(update.id).setAborting();
+        }
+        break;
+    }
+
+    this.#uiBlocker.unblock();
+  };
+
+  #handleModelEvent = (updateType, data) => {
+    switch (updateType) {
+      case UpdateType.PATCH:
+        this.#pointPresenter.get(data.id).init(data);
+        break;
+      case UpdateType.MINOR:
+        this.#clearBoard();
+        this.#renderBoard();
+        break;
+      case UpdateType.MAJOR:
+        this.#clearBoard({ resetSortType: true });
+        this.#renderBoard();
+        break;
+      case UpdateType.INIT_POINT:
+        this.#isPointLoading = false;
+        break;
+      case UpdateType.INIT_POINT_COMMON:
+        this.#pointCommon = this.#pointCommonModel.pointCommon;
+        this.#isPointCommonLoading = false;
+        break;
+      case UpdateType.ERROR_LOADING:
+        this.#isErrorLoading = true;
+        remove(this.#loadingComponent);
+        this.#clearBoard();
+        this.#renderBoard();
+        break;
+    }
+    if ((updateType === UpdateType.INIT_POINT ||
+      updateType === UpdateType.INIT_POINT_COMMON) &&
+      (!this.#isPointLoading && !this.#isPointCommonLoading)) {
+      this.#createNewPointPresenter();
+      remove(this.#loadingComponent);
+      this.#clearBoard();
+      this.#renderBoard();
+    }
+  };
 
   #handleSortTypeChange = (sortType) => {
     if (this.#currentSortType === sortType) {
@@ -103,19 +194,42 @@ export default class TripPresenter {
       onSortTypeChange: this.#handleSortTypeChange
     });
 
-    render(this.#sortComponent, this.#tripComponent.element, RenderPosition.AFTERBEGIN);
+    render(this.#sortComponent, this.#sortContainer, RenderPosition.AFTERBEGIN);
   }
 
-  #handleModeChange = () => {
-    this.#newPointPresenter.destroy();
-    this.#pointPresenter.forEach((presenter) => presenter.resetView());
-  };
+  #renderPoints(points) {
+    points.forEach((point) => this.#renderPoint(point));
+  }
+
+  #renderLoading() {
+    render(this.#loadingComponent, this.#tripContainer);
+  }
+
+  #renderErrorLoading() {
+    render(this.#ErrorLoadingView, this.#tripContainer);
+  }
+
+  #renderPoint(point) {
+    const pointPresenter = new PointPresenter({
+      tripPointContainer: this.#tripComponent.element,
+      onModeChange: this.#handleModeChange,
+      onDataChange: this.#handleViewAction,
+      apiModel: this.#apiModel,
+      pointCommon: this.#pointCommon,
+    });
+
+    pointPresenter.init(point);
+    this.#pointPresenter.set(point.id, pointPresenter);
+  }
 
   #clearBoard({ resetSortType = false } = {}) {
-    this.#newPointPresenter.destroy();
+    if(this.#newPointPresenter){
+      this.#newPointPresenter.destroy();
+    }
     this.#pointPresenter.forEach((presenter) => presenter.destroy());
     this.#pointPresenter.clear();
 
+    remove(this.#loadingComponent);
     remove(this.#sortComponent);
     if (this.#noPointComponent) {
       remove(this.#noPointComponent);
@@ -126,46 +240,20 @@ export default class TripPresenter {
   }
 
   #renderBoard() {
+    if (this.#isErrorLoading) {
+      this.#renderErrorLoading();
+    }
+    if ((this.#isPointLoading || this.#isPointCommonLoading) && !this.#isErrorLoading) {
+      this.#renderLoading();
+    }
     const points = this.points;
-    if (points.length === 0) {
+    const pointsCount = this.points.length;
+    if (pointsCount === 0) {
       this.#renderNoPoint();
     } else {
       this.#renderSort();
       render(this.#tripComponent, this.#tripContainer);
-      points.forEach((point) => {
-        this.#renderPoint(point);
-      });
+      this.#renderPoints(points);
     }
   }
-
-  #handleViewAction = (actionType, updateType, update) => {
-    switch (actionType) {
-      case UserAction.UPDATE_POINT:
-        this.#waypointModel.updatePoint(updateType, update);
-        break;
-      case UserAction.ADD_POINT:
-        this.#waypointModel.addPoint(updateType, update);
-        break;
-      case UserAction.DELETE_POINT:
-        this.#waypointModel.deletePoint(updateType, update);
-        break;
-    }
-  };
-
-  #handleModelEvent = (updateType, data) => {
-    switch (updateType) {
-      case UpdateType.PATCH:
-        this.#pointPresenter.get(data.id).init(data);
-        break;
-      case UpdateType.MINOR:
-        this.#clearBoard();
-        this.#renderBoard();
-        break;
-      case UpdateType.MAJOR:
-        this.#clearBoard({ resetRenderedTaskCount: true, resetSortType: true });
-        this.#renderBoard();
-        break;
-    }
-  };
-
 }
