@@ -3,6 +3,7 @@ import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 import { TYPES } from '../const.js';
+import he from 'he';
 
 const DATE_FORMAT = 'DD/MM/YY HH:mm';
 
@@ -109,7 +110,8 @@ function createPointEditTemplate(tripPoint, pointCommon) {
           id="event-destination-${id}"
           type="text"
           name="event-destination"
-          value='${pointDestination ? pointDestination.name : ''}'
+          required
+           value="${he.encode(pointDestination ? pointDestination.name : '')}"
           list="destination-list-${id}"
           ${isDisabled ? 'disabled' : ''}>
         <datalist id="destination-list-${id}">
