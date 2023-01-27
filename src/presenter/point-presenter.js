@@ -10,22 +10,15 @@ const Mode = {
 
 export default class PointPresenter {
   #tripPointContainer = null;
-
   #pointComponent = null;
   #pointEditComponent = null;
-
   #point = null;
-  #offers = null;
-  #destination = null;
-
   #handleModeChange = null;
   #mode = Mode.DEFAULT;
-  #apiModel = null;
   #pointCommon = null;
   #handleDataChange = null;
 
-  constructor({tripPointContainer, pointCommon, onModeChange, onDataChange, apiModel}) {
-    this.#apiModel = apiModel;
+  constructor({tripPointContainer, pointCommon, onModeChange, onDataChange}) {
     this.#tripPointContainer = tripPointContainer;
     this.#handleModeChange = onModeChange;
     this.#handleDataChange = onDataChange;
@@ -33,10 +26,7 @@ export default class PointPresenter {
   }
 
   init(point) {
-    const {offers, destination} = point;
     this.#point = point;
-    this.#offers = offers;
-    this.#destination = destination;
     const prevPointComponent = this.#pointComponent;
     const prevPointEditComponent = this.#pointEditComponent;
 
@@ -48,12 +38,9 @@ export default class PointPresenter {
 
     this.#pointEditComponent = new PointEditView({
       point: this.#point,
-      offers: this.#offers,
-      destination: this.#destination,
       onFormSubmit: this.#formSubmitHandler,
       onFormClose: this.#closeEventEditFormHandler,
       onDeleteClick: this.#deleteClickHandler,
-      apiModel: this.#apiModel,
       pointCommon: this.#pointCommon,
     });
 

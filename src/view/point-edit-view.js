@@ -3,13 +3,13 @@ import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 import { TYPES } from '../const.js';
+import he from 'he';
 
 const DATE_FORMAT = 'DD/MM/YY HH:mm';
 
 export const BLANK_POINT = {
   basePrice: 1,
   destination: -1,
-  id:0,
   offers: [],
   type: TYPES[0]
 };
@@ -110,7 +110,8 @@ function createPointEditTemplate(tripPoint, pointCommon) {
           id="event-destination-${id}"
           type="text"
           name="event-destination"
-          value='${pointDestination ? pointDestination.name : ''}'
+          required
+           value="${he.encode(pointDestination ? pointDestination.name : '')}"
           list="destination-list-${id}"
           ${isDisabled ? 'disabled' : ''}>
         <datalist id="destination-list-${id}">
@@ -148,15 +149,17 @@ function createPointEditTemplate(tripPoint, pointCommon) {
     </header>
     <section class="event__details">
       <section class="event__section  event__section--offers">
-        <h3 class="event__section-title  event__section-title--offers">Offers</h3>
-
+       ${!pointTypeOffer || !pointTypeOffer.offers || pointTypeOffer.offers.length === 0
+      ? ''
+      : '<h3 class="event__section-title  event__section-title--offers">Offers</h3>'}
         <div class="event__available-offers">
         ${createSectionOffersEditTemplate(pointTypeOffer, offers, type)}
         </div>
       </section>
 
       <section class="event__section  event__section--destination">
-        <h3 class="event__section-title  event__section-title--destination">Destination</h3>
+       ${pointDestination ? '<h3 class="event__section-title  event__section-title--destination">Destination</h3>'
+      : '' }
         <p class="event__destination-description">${pointDestination ? pointDestination.description : ''}</p>
         <div class="event__photos-container">
           <div class="event__photos-tape">
@@ -173,29 +176,21 @@ function createPointEditTemplate(tripPoint, pointCommon) {
 export default class PointEditView extends AbstractStatefulView {
   #handleFormSubmit = null;
   #handleFormClose = null;
-  #offers = null;
-  #destination = null;
   #datepickerFrom = null;
   #datepickerTo = null;
   #handleDeleteClick = null;
-  #apiModel = null;
-  #tripPoint = null;
   #pointCommon = null;
 
   constructor({ point = {
     ...BLANK_POINT,
     dateFrom: new Date(),
     dateTo: new Date(),
-  }, onFormSubmit, onFormClose, offers, destination, onDeleteClick, apiModel, pointCommon}) {
+  }, onFormSubmit, onFormClose, onDeleteClick, pointCommon}) {
     super();
-    this.#apiModel = apiModel;
-    this.#tripPoint = point;
     this._setState(PointEditView.parsePointToState(point));
     this.#pointCommon = pointCommon;
     this.#handleFormSubmit = onFormSubmit;
     this.#handleFormClose = onFormClose;
-    this.#offers = offers;
-    this.#destination = pointCommon.allDestinations.find((item) => destination === item.id);
     this.#handleDeleteClick = onDeleteClick;
 
     this._restoreHandlers();
