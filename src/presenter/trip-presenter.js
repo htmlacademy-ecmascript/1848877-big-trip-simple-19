@@ -248,7 +248,7 @@ export default class TripPresenter {
     }
     const points = this.points;
     const pointsCount = this.points.length;
-    if (pointsCount === 0) {
+    if (pointsCount === 0 && !this.#isPointLoading) {
       this.#renderNoPoint();
     }
     this.#renderSort();
