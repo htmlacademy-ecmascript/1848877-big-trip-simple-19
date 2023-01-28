@@ -24,25 +24,28 @@ function getPicturesListTemplate(pointDestination) {
   return template;
 }
 
-function createEventTypeItemEditTemplate(offers) {
-  const elementEditTypes = offers.map((elem) => `
+function createEventTypeItemEditTemplate(offers, id, type) {
+  const elementEditTypes = offers.map((elem) => {
+    const checked = elem.type === type ? 'checked' : '';
+    return `
     <div class="event__type-item">
       <input
-        id="event-type-${he.encode(elem.type)}-${elem.id}"
+        id="event-type-${he.encode(elem.type)}-${id}"
         class="event__type-input
         visually-hidden"
         type="radio"
         name="event-type"
         value="${he.encode(elem.type)}"
+        ${checked}
       >
         <label
           class="event__type-label event__type-label--${he.encode(elem.type)}"
-          for="event-type-${he.encode(elem.type)}-${elem.id}"
+          for="event-type-${he.encode(elem.type)}-${id}"
         >
           ${he.encode(elem.type)}
         </label>
-    </div>`
-  ).join('');
+    </div>`;
+  }).join('');
 
   return elementEditTypes;
 }
@@ -96,7 +99,7 @@ function createPointEditTemplate(tripPoint, pointCommon) {
         <div class="event__type-list">
           <fieldset class="event__type-group">
             <legend class="visually-hidden">Event type</legend>
-            ${createEventTypeItemEditTemplate(pointCommon.allOffers)}
+            ${createEventTypeItemEditTemplate(pointCommon.allOffers, id, type)}
           </fieldset>
         </div>
       </div>
