@@ -8,7 +8,7 @@ import PointsApiService from './points-api-service.js';
 import PointCommonModel from './model/point-common-model.js';
 import PointCommonApiService from './point-common-api-service.js';
 
-const AUTHORIZATION = 'Basic err883jdzbdv';
+const AUTHORIZATION = 'Basic err883jdzbdm';
 const END_POINT = 'https://19.ecmascript.pages.academy/big-trip-simple';
 
 const apiModel = new ApiModel({
