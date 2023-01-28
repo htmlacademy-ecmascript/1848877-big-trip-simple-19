@@ -34,4 +34,4 @@ export const sortPointPrice = (pointA, pointB) => {
   return weight ?? pointB.basePrice - pointA.basePrice;
 };
 
-
+export const capitalizeFirstLetter = (string) => `${string[0].toUpperCase()}${string.slice(1)}`;

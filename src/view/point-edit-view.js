@@ -4,6 +4,7 @@ import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 import { TYPES } from '../const.js';
 import he from 'he';
+import { capitalizeFirstLetter } from '../utils/task.js';
 
 const DATE_FORMAT = 'DD/MM/YY HH:mm';
 
@@ -27,6 +28,7 @@ function getPicturesListTemplate(pointDestination) {
 function createEventTypeItemEditTemplate(offers, id, type) {
   const elementEditTypes = offers.map((elem) => {
     const checked = elem.type === type ? 'checked' : '';
+    const eventType = capitalizeFirstLetter(elem.type);
     return `
     <div class="event__type-item">
       <input
@@ -42,7 +44,7 @@ function createEventTypeItemEditTemplate(offers, id, type) {
           class="event__type-label event__type-label--${he.encode(elem.type)}"
           for="event-type-${he.encode(elem.type)}-${id}"
         >
-          ${he.encode(elem.type)}
+          ${he.encode(eventType)}
         </label>
     </div>`;
   }).join('');
@@ -79,7 +81,7 @@ function createPointEditTemplate(tripPoint, pointCommon) {
   const isNewPoint = !('id' in tripPoint);
   const { offers, type, dateFrom, dateTo, destination, basePrice, id, isDisabled, isSaving, isDeleting } = tripPoint;
 
-  const chooseDestination = pointCommon.allDestinations.map((element) => `<option value="${element.name}">`).join('');
+  const chooseDestination = pointCommon.allDestinations.map((element) => `<option value="${he.encode(element.name)}">`).join('');
   const parceDateStart = dayjs(he.encode(String(dateFrom)));
   const parceDateEnd = dayjs(he.encode(String(dateTo)));
   const pointDestination = pointCommon.allDestinations.find((item) => destination === item.id);
