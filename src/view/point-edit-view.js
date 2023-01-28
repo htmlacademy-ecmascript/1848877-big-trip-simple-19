@@ -299,6 +299,7 @@ export default class PointEditView extends AbstractStatefulView {
         enableTime: true,
         defaultDate: this._state.dateFrom,
         onChange: this.#dateFromChangeHandler,
+        // eslint-disable-next-line camelcase
         time_24hr: true
       },
     );
@@ -310,6 +311,7 @@ export default class PointEditView extends AbstractStatefulView {
         defaultDate: this._state.dateTo,
         minDate: this._state.dateFrom,
         onChange: this.#dateToChangeHandler,
+        // eslint-disable-next-line camelcase
         time_24hr: true
       },
     );
