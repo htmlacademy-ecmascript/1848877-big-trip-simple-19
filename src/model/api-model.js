@@ -28,9 +28,6 @@ export default class ApiModel extends Observable {
 
   async updatePoint(updateType, update) {
     const index = this.#points.findIndex((point) => point.id === update.id);
-    if (index === -1) {
-      throw new Error('Can\'t update unexisting point');
-    }
 
     try {
       const response = await this.#pointsApiService.updatePoint(update);
@@ -59,10 +56,6 @@ export default class ApiModel extends Observable {
 
   async deletePoint(updateType, update) {
     const index = this.#points.findIndex((point) => point.id === update.id);
-
-    if (index === -1) {
-      throw new Error('Can\'t delete unexisting point');
-    }
 
     try {
       await this.#pointsApiService.deletePoint(update);

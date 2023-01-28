@@ -299,6 +299,7 @@ export default class PointEditView extends AbstractStatefulView {
         enableTime: true,
         defaultDate: this._state.dateFrom,
         onChange: this.#dateFromChangeHandler,
+        time_24hr: true
       },
     );
     this.#datepickerTo = flatpickr(
@@ -309,6 +310,7 @@ export default class PointEditView extends AbstractStatefulView {
         defaultDate: this._state.dateTo,
         minDate: this._state.dateFrom,
         onChange: this.#dateToChangeHandler,
+        time_24hr: true
       },
     );
   }

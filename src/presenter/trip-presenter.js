@@ -184,6 +184,7 @@ export default class TripPresenter {
 
     this.#currentSortType = sortType;
 
+
     this.#clearBoard();
     this.#renderBoard();
   };
@@ -249,10 +250,9 @@ export default class TripPresenter {
     const pointsCount = this.points.length;
     if (pointsCount === 0) {
       this.#renderNoPoint();
-    } else {
-      this.#renderSort();
-      render(this.#tripComponent, this.#tripContainer);
-      this.#renderPoints(points);
     }
+    this.#renderSort();
+    render(this.#tripComponent, this.#tripContainer);
+    this.#renderPoints(points);
   }
 }
