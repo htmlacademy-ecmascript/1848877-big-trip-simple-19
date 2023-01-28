@@ -18,7 +18,7 @@ function getPicturesListTemplate(pointDestination) {
   let template = '';
   if (pointDestination) {
     template = pointDestination.pictures.map(
-      (elem) => `<img class="event__photo" src=${elem.src} alt="${elem.description}">`
+      (elem) => `<img class="event__photo" src=${he.encode(elem.src)} alt="${he.encode(elem.description)}">`
     ).join('');
   }
   return template;
@@ -28,18 +28,18 @@ function createEventTypeItemEditTemplate(offers) {
   const elementEditTypes = offers.map((elem) => `
     <div class="event__type-item">
       <input
-        id="event-type-${elem.type}-${elem.id}"
+        id="event-type-${he.encode(elem.type)}-${elem.id}"
         class="event__type-input
         visually-hidden"
         type="radio"
         name="event-type"
-        value="${elem.type}"
+        value="${he.encode(elem.type)}"
       >
         <label
-          class="event__type-label event__type-label--${elem.type}"
-          for="event-type-${elem.type}-${elem.id}"
+          class="event__type-label event__type-label--${he.encode(elem.type)}"
+          for="event-type-${he.encode(elem.type)}-${elem.id}"
         >
-          ${elem.type}
+          ${he.encode(elem.type)}
         </label>
     </div>`
   ).join('');
@@ -55,15 +55,15 @@ function createSectionOffersEditTemplate(offerTypes, offer, type) {
         <input
           class="event__offer-checkbox
           visually-hidden"
-          id="event-offer-${type}-${elem.id}"
+          id="event-offer-${he.encode(type)}-${elem.id}"
           type="checkbox"
-          name=${elem.title}
+          name=${he.encode(elem.title)}
           data-offer-id="${elem.id}" ${offer.includes(elem.id) ? 'checked' : ''}
         >
-          <label class="event__offer-label" for="event-offer-${type}-${elem.id}">
-            <span class="event__offer-title">${elem.title}</span>
+          <label class="event__offer-label" for="event-offer-${he.encode(type)}-${elem.id}">
+            <span class="event__offer-title">${he.encode(elem.title)}</span>
             &plus;&euro;&nbsp;
-            <span class="event__offer-price">${elem.price}</span>
+            <span class="event__offer-price">${he.encode(String(elem.price))}</span>
           </label>
       </div>`
     )).join('');
@@ -77,8 +77,8 @@ function createPointEditTemplate(tripPoint, pointCommon) {
   const { offers, type, dateFrom, dateTo, destination, basePrice, id, isDisabled, isSaving, isDeleting } = tripPoint;
 
   const chooseDestination = pointCommon.allDestinations.map((element) => `<option value="${element.name}">`).join('');
-  const parceDateStart = dayjs(dateFrom);
-  const parceDateEnd = dayjs(dateTo);
+  const parceDateStart = dayjs(he.encode(String(dateFrom)));
+  const parceDateEnd = dayjs(he.encode(String(dateTo)));
   const pointDestination = pointCommon.allDestinations.find((item) => destination === item.id);
   const pointTypeOffer = pointCommon.allOffers.find((offer) => offer.type === type);
 
@@ -87,11 +87,11 @@ function createPointEditTemplate(tripPoint, pointCommon) {
   <form class="event event--edit" action="#" method="post">
     <header class="event__header">
       <div class="event__type-wrapper">
-        <label class="event__type  event__type-btn" for="event-type-toggle-${id}">
+        <label class="event__type  event__type-btn" for="event-type-toggle-${he.encode(String(id))}">
           <span class="visually-hidden">Choose event type</span>
-          <img class="event__type-icon" width="17" height="17" src="img/icons/${type}.png" alt="Event type icon">
+          <img class="event__type-icon" width="17" height="17" src="img/icons/${he.encode(type)}.png" alt="Event type icon">
         </label>
-        <input class="event__type-toggle  visually-hidden" id="event-type-toggle-${id}" type="checkbox" ${isDisabled ? 'disabled' : ''}>
+        <input class="event__type-toggle  visually-hidden" id="event-type-toggle-${he.encode(String(id))}" type="checkbox" ${isDisabled ? 'disabled' : ''}>
 
         <div class="event__type-list">
           <fieldset class="event__type-group">
@@ -102,37 +102,37 @@ function createPointEditTemplate(tripPoint, pointCommon) {
       </div>
 
       <div class="event__field-group  event__field-group--destination">
-        <label class="event__label  event__type-output" for="event-destination-${id}">
-        ${type}
+        <label class="event__label  event__type-output" for="event-destination-${he.encode(String(id))}">
+        ${he.encode(type)}
         </label>
         <input
           class="event__input event__input--destination"
-          id="event-destination-${id}"
+          id="event-destination-${he.encode(String(id))}"
           type="text"
           name="event-destination"
           required
            value="${he.encode(pointDestination ? pointDestination.name : '')}"
-          list="destination-list-${id}"
+          list="destination-list-${he.encode(String(id))}"
           ${isDisabled ? 'disabled' : ''}>
-        <datalist id="destination-list-${id}">
+        <datalist id="destination-list-${he.encode(String(id))}">
           ${chooseDestination}
         </datalist>
       </div>
 
       <div class="event__field-group  event__field-group--time">
-        <label class="visually-hidden" for="event-start-time-${id}">From</label>
-        <input class="event__input  event__input--time event-start-time" data-start-time id="event-start-time-${id}" type="text" name="event-start-time" value='${parceDateStart.format(DATE_FORMAT)}' ${isDisabled ? 'disabled' : ''}>
+        <label class="visually-hidden" for="event-start-time-${he.encode(String(id))}">From</label>
+        <input class="event__input  event__input--time event-start-time" data-start-time id="event-start-time-${he.encode(String(id))}" type="text" name="event-start-time" value='${parceDateStart.format(DATE_FORMAT)}' ${isDisabled ? 'disabled' : ''}>
         &mdash;
-        <label class="visually-hidden" for="event-end-time-${id}">To</label>
-        <input class="event__input  event__input--time event-end-time" data-end-time id="event-end-time-${id}" type="text" name="event-end-time" value='${parceDateEnd.format(DATE_FORMAT)}' ${isDisabled ? 'disabled' : ''}>
+        <label class="visually-hidden" for="event-end-time-${he.encode(String(id))}">To</label>
+        <input class="event__input  event__input--time event-end-time" data-end-time id="event-end-time-${he.encode(String(id))}" type="text" name="event-end-time" value='${parceDateEnd.format(DATE_FORMAT)}' ${isDisabled ? 'disabled' : ''}>
       </div>
 
       <div class="event__field-group  event__field-group--price">
-        <label class="event__label" for="event-price-${id}">
+        <label class="event__label" for="event-price-${he.encode(String(id))}">
           <span class="visually-hidden">Price</span>
           &euro;
         </label>
-        <input class="event__input  event__input--price" id="event-price-${id}" type="text" name="event-price" value="${basePrice !== null ? basePrice : ''}" ${isDisabled ? 'disabled' : ''}>
+        <input class="event__input  event__input--price" id="event-price-${he.encode(String(id))}" type="text" name="event-price" value="${he.encode(String(basePrice)) !== null ? he.encode(String(basePrice)) : ''}" ${isDisabled ? 'disabled' : ''}>
       </div>
 
       <button class="event__save-btn  btn  btn--blue" type="submit" ${isDisabled ? 'disabled' : ''}>${isSaving ? 'Saving...' : 'Save'}</button>
@@ -160,7 +160,7 @@ function createPointEditTemplate(tripPoint, pointCommon) {
       <section class="event__section  event__section--destination">
        ${pointDestination ? '<h3 class="event__section-title  event__section-title--destination">Destination</h3>'
       : '' }
-        <p class="event__destination-description">${pointDestination ? pointDestination.description : ''}</p>
+        <p class="event__destination-description">${he.encode(pointDestination ? pointDestination.description : '')}</p>
         <div class="event__photos-container">
           <div class="event__photos-tape">
           ${getPicturesListTemplate(pointDestination)}
